@@ -1,5 +1,9 @@
 %{
 	#include <string.h>
+
+	typedef int bool;
+	#define TRUE 1
+	#define FALSE 0
 %}
 
 /* Alphabet */
@@ -35,7 +39,6 @@ R_ENT				"ent"
 R_ENTERO			"entero"
 R_FACCION			"faccion"
 R_FALGORITMO		"falgoritmo"
-R_FALSO				"falso"
 R_FCONST			"fconst"
 R_FFUNCION			"ffuncion"
 R_FMIENTRAS			"fmientras"
@@ -60,7 +63,6 @@ R_TABLA				"tabla"
 R_TIPO				"tipo"
 R_TUPLA				"tupla"
 R_VAR				"var"
-R_VERDADERO			"verdadero"
 R_Y					"y"
 
 /* Operators */
@@ -126,7 +128,7 @@ SEPARATOR		" "|\t|\n
 
 {LITERAL_INT} {
 	int i;
-	long int number = atoi(yytext);
+	long int value = atoi(yytext);
 	long int exponent = 0;
 
 	for (i = 0; i < strlen(yytext); i++) {
@@ -137,26 +139,35 @@ SEPARATOR		" "|\t|\n
 	}
 
 	for (i = 0; i < exponent; i++) {
-		number *= 10;
+		value *= 10;
 	}
 
-	printf("LITERAL_INT: %ld\n", number);
+	printf("LITERAL_INT: %ld\n", value);
 }
 
 {LITERAL_REAL} {
-	printf("LITERAL_REAL: %f\n", atof(yytext));
+	double value = atof(yytext);
+	printf("LITERAL_REAL: %f\n", value);
 }
 
 {LITERAL_BOOL} {
-	printf("LITERAL_BOOL: %s\n", yytext);
+	bool value = FALSE;
+	if (strcmp(yytext, "verdadero") == 0) {
+		value = TRUE;
+	}
+
+	printf("LITERAL_BOOL: %s (%d)\n", yytext, value);
 }
 
 {LITERAL_CHAR} {
-	printf("LITERAL_CHAR: %s\n", yytext);
+	char value = yytext[1];
+	printf("LITERAL_CHAR: %c\n", value);
 }
 
 {LITERAL_STR} {
-	printf("LITERAL_STR: %s\n", yytext);
+	char* value = yytext+1;
+	value[strlen(value) - 1] = '\0';
+	printf("LITERAL_STR: %s\n", value);
 }
 
 {R_ACCION} {
@@ -217,10 +228,6 @@ R_DEV {
 
 {R_FALGORITMO} {
 	printf("RESERVED: falgoritmo = %s\n", yytext);
-}
-
-{R_FALSO} {
-	printf("RESERVED: falso = %s\n", yytext);
 }
 
 {R_FCONST} {
@@ -317,10 +324,6 @@ R_DEV {
 
 {R_VAR} {
 	printf("RESERVED: var = %s\n", yytext);
-}
-
-{R_VERDADERO} {
-	printf("RESERVED: verdadero = %s\n", yytext);
 }
 
 {R_Y} {
