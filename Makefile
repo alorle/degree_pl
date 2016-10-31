@@ -1,5 +1,5 @@
 scanner:
-	flex --outfile=scanner.c scanner.l
+	flex -i --outfile=scanner.c scanner.l
 	gcc scanner.c -o scanner -lfl
 
 test: scanner

@@ -1,27 +1,82 @@
+%{
+	#include <string.h>
+%}
 
-/* Alfabeto */
-UPPER			[A-Z]
-LOWER			[a-z]
-DIGIT    		[0-9]
-SPECIAL			["/()=\[\]+*{},;.:\-_><]
-NUMBER			{DIGIT}{DIGIT}*
-CHAR			{UPPER}|{LOWER}
+/* Alphabet */
+UPPER				[A-Z]
+LOWER				[a-z]
+DIGIT    			[0-9]
+SPECIAL				["/()=\[\]+*{},;.:\-_><]
+NUMBER				{DIGIT}{DIGIT}*
+CHAR				{UPPER}|{LOWER}
 
 /* Tokens */
-ID				{CHAR}({CHAR}|{DIGIT})*
-LITERAL_INT		(\+|\-)?{NUMBER}*((e|E){NUMBER}*)?
-LITERAL_REAL	(\+|\-)?{NUMBER}*(.{NUMBER}*)?((e|E){NUMBER}*)?
-LITERAL_BOOL	"verdadero"|"falso"
-LITERAL_CHAR	\"{CHAR}\"
-LITERAL_STR		\'([^']|(\/'))*'
-COMMENT			\{([^}]|(\/\}))*\}
-RESERVED		"accion"|"algoritmo"|"booleano"|"cadena"|"caracter"|"const"|"continuar"|"de"|"dev"|"div"|"ent"|"entero"|"e/s"|"faccion"|"falgoritmo"|"falso"|"fconst"|"ffuncion"|"fmientras"|"fpara"|"fsi"|"ftipo"|"ftupla"|"funcion"|"fvar"|"hacer"|"hasta"|"mientras"|"mod"|"no"|"o"|"para"|"real"|"ref"|"sal"|"si"|"tabla"|"tipo"|"tupla"|"var"|"verdadero"|"y"
-OPERATORS		":="|";"|","|".."|":"|"->"|"\[\]"|"="|"\["|"\]"
+ID					{CHAR}({CHAR}|{DIGIT})*
+LITERAL_INT			(\+|\-)?{NUMBER}*((e|E){NUMBER}*)?
+LITERAL_REAL		(\+|\-)?{NUMBER}*(\.{NUMBER}*)?((e|E){NUMBER}*)?
+LITERAL_BOOL		"verdadero"|"falso"
+LITERAL_CHAR		\"{CHAR}\"
+LITERAL_STR			\'([^']|(\/'))*'
+COMMENT				\{([^}]|(\/\}))*\}
 
-/* No hacen falta */
-SPACE			[\ ]
-HT		    	[\t]
-NL		    	[\n]
+/* Reserved words */
+R_ACCION			"accion"
+R_ALGORITMO			"algoritmo"
+R_BOOLEANO			"booleano"
+R_CADENA			"cadena"
+R_CARACTER			"caracter"
+R_CONST				"const"
+R_CONTINUAR			"continuar"
+R_DE				"de"
+R_DEV				"dev"
+R_DIV				"div"
+R_ES				"e/s"
+R_ENT				"ent"
+R_ENTERO			"entero"
+R_FACCION			"faccion"
+R_FALGORITMO		"falgoritmo"
+R_FALSO				"falso"
+R_FCONST			"fconst"
+R_FFUNCION			"ffuncion"
+R_FMIENTRAS			"fmientras"
+R_FPARA 			"fpara"
+R_FSI   			"fsi"
+R_FTIPO 			"ftipo"
+R_FTUPLA			"ftupla"
+R_FUNCION			"funcion"
+R_FVAR  			"fvar"
+R_HACER 			"hacer"
+R_HASTA 			"hasta"
+R_MIENTRAS			"mientras"
+R_MOD   			"mod"
+R_NO				"no"
+R_O					"o"
+R_PARA				"para"
+R_REAL				"real"
+R_REF				"ref"
+R_SAL				"sal"
+R_SI				"si"
+R_TABLA				"tabla"
+R_TIPO				"tipo"
+R_TUPLA				"tupla"
+R_VAR				"var"
+R_VERDADERO			"verdadero"
+R_Y					"y"
+
+/* Operators */
+OP_ASSIGNAMENT		":="
+OP_SEQU_COMPOS		";"
+OP_SEPARATOR		","
+OP_SUBRANGE			".."
+OP_VAR_TYPE_DEF		":"
+OP_THEN				"->"
+OP_ELSE_IF			"\[\]"
+OP_TYPE_DEFINITION	"="
+OP_ARRAY_INIT		"\["
+OP_ARRAY_CLOSE		"\]"
+
+/* Ignored */
+SEPARATOR		" "|\t|\n
 
 %%
 
@@ -29,12 +84,67 @@ NL		    	[\n]
 	printf("COMMENT: %s\n", yytext);
 }
 
+{OP_ASSIGNAMENT} {
+	printf("OP asignación: %s\n", yytext);
+}
+
+{OP_SEQU_COMPOS} {
+	printf("OP composición secuencial: %s\n", yytext);
+}
+
+{OP_SEPARATOR} {
+	printf("OP separador: %s\n", yytext);
+}
+
+{OP_SUBRANGE} {
+	printf("OP subrango: %s\n", yytext);
+}
+
+{OP_VAR_TYPE_DEF} {
+	printf("OP definición de tipo de una variable: %s\n", yytext);
+}
+
+{OP_THEN} {
+	printf("OP entonces: %s\n", yytext);
+}
+
+{OP_ELSE_IF} {
+	printf("OP si no si: %s\n", yytext);
+}
+
+{OP_TYPE_DEFINITION} {
+	printf("OP creación de tipo: %s\n", yytext);
+}
+
+{OP_ARRAY_INIT} {
+	printf("OP inicio de array: %s\n", yytext);
+}
+
+{OP_ARRAY_CLOSE} {
+	printf("OP fin de array: %s\n", yytext);
+}
+
 {LITERAL_INT} {
-	printf("LITERAL_INT: %s\n", yytext);
+	int i;
+	long int number = atoi(yytext);
+	long int exponent = 0;
+
+	for (i = 0; i < strlen(yytext); i++) {
+		if (yytext[i] == 'e' || yytext[i] == 'E') {
+			exponent = atoi(yytext+i+1);
+			break;
+		}
+	}
+
+	for (i = 0; i < exponent; i++) {
+		number *= 10;
+	}
+
+	printf("LITERAL_INT: %ld\n", number);
 }
 
 {LITERAL_REAL} {
-	printf("LITERAL_REAL: %s\n", yytext);
+	printf("LITERAL_REAL: %f\n", atof(yytext));
 }
 
 {LITERAL_BOOL} {
@@ -49,41 +159,184 @@ NL		    	[\n]
 	printf("LITERAL_STR: %s\n", yytext);
 }
 
-{RESERVED} {
-	printf("RESERVED: %s\n", yytext);
+{R_ACCION} {
+	printf("RESERVED: accion = %s\n", yytext);
 }
 
-{OPERATORS}	{
-	printf("OPERATOR: %s\n", yytext);
+{R_ALGORITMO} {
+	printf("RESERVED: algoritmo = %s\n", yytext);
+}
+
+{R_BOOLEANO} {
+	printf("RESERVED: booleano = %s\n", yytext);
+}
+
+{R_CADENA} {
+	printf("RESERVED: cadena = %s\n", yytext);
+}
+
+{R_CARACTER} {
+	printf("RESERVED: caracter = %s\n", yytext);
+}
+
+{R_CONST} {
+	printf("RESERVED: const = %s\n", yytext);
+}
+
+{R_CONTINUAR} {
+	printf("RESERVED: continuar = %s\n", yytext);
+}
+
+{R_DE} {
+	printf("RESERVED: de = %s\n", yytext);
+}
+
+R_DEV {
+	printf("RESERVED: dev = %s\n", yytext); 
+}
+
+{R_DIV} {
+	printf("RESERVED: div = %s\n", yytext);
+}
+
+{R_ES} {
+	printf("RESERVED: es = %s\n", yytext);
+}
+
+{R_ENT} {
+	printf("RESERVED: ent = %s\n", yytext);
+}
+
+{R_ENTERO} {
+	printf("RESERVED: entero = %s\n", yytext);
+}
+
+{R_FACCION} {
+	printf("RESERVED: faccion = %s\n", yytext);
+}
+
+{R_FALGORITMO} {
+	printf("RESERVED: falgoritmo = %s\n", yytext);
+}
+
+{R_FALSO} {
+	printf("RESERVED: falso = %s\n", yytext);
+}
+
+{R_FCONST} {
+	printf("RESERVED: fconst = %s\n", yytext);
+}
+
+{R_FFUNCION} {
+	printf("RESERVED: ffuncion = %s\n", yytext);
+}
+
+{R_FMIENTRAS} {
+	printf("RESERVED: fmientras = %s\n", yytext);
+}
+
+{R_FPARA} {
+	printf("RESERVED: fpara = %s\n", yytext);
+}
+
+{R_FSI} {
+	printf("RESERVED: fsi = %s\n", yytext);
+}
+
+{R_FTIPO} {
+	printf("RESERVED: ftipo = %s\n", yytext); 
+}
+
+{R_FTUPLA} {
+	printf("RESERVED: ftupla = %s\n", yytext); 
+}
+
+{R_FUNCION} {
+	printf("RESERVED: funcion = %s\n", yytext); 
+}
+
+{R_FVAR} {
+	printf("RESERVED: fvar = %s\n", yytext); 
+}
+
+{R_HACER} {
+	printf("RESERVED: hacer = %s\n", yytext); 
+}
+
+{R_HASTA} {
+	printf("RESERVED: hasta = %s\n", yytext); 
+}
+
+{R_MIENTRAS} {
+	printf("RESERVED: mientras = %s\n", yytext); 
+}
+
+{R_MOD} {
+	printf("RESERVED: mod = %s\n", yytext); 
+}
+
+{R_NO} {
+	printf("RESERVED: no = %s\n", yytext); 
+}
+
+{R_O} {
+	printf("RESERVED: o = %s\n", yytext); 
+}
+
+{R_PARA} {
+	printf("RESERVED: para = %s\n", yytext); 
+}
+
+{R_REAL} {
+	printf("RESERVED: real = %s\n", yytext); 
+}
+
+{R_REF} {
+	printf("RESERVED: ref = %s\n", yytext); 
+}
+
+{R_SAL} {
+	printf("RESERVED: sal = %s\n", yytext); 
+}
+
+{R_SI} {
+	printf("RESERVED: si = %s\n", yytext); 
+}
+
+{R_TABLA} {
+	printf("RESERVED: tabla = %s\n", yytext); 
+}
+
+{R_TIPO} {
+	printf("RESERVED: tipo = %s\n", yytext);
+}
+
+{R_TUPLA} {
+	printf("RESERVED: tupla = %s\n", yytext);
+}
+
+{R_VAR} {
+	printf("RESERVED: var = %s\n", yytext);
+}
+
+{R_VERDADERO} {
+	printf("RESERVED: verdadero = %s\n", yytext);
+}
+
+{R_Y} {
+	printf("RESERVED: y = %s\n", yytext);
 }
 
 {ID} {
 	printf("ID: %s\n", yytext);
 }
 
-{UPPER} {
-	printf("UPPERCASE: %s\n", yytext);
-}
-
-{LOWER}	{
-	printf("LOWERCASE: %s\n", yytext);
-}
-
-{DIGIT} {
-	printf("DIGIT: %s\n", yytext);
-}
-
 {SPECIAL} {
 	printf("SPECIAL: %s\n", yytext);
 }
 
-{SPACE} {}
-
-{HT} {}
-
-{NL} {}
-
-. {}
+. {
+}
 
 %%
 
