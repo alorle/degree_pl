@@ -400,8 +400,8 @@ R_DEV {
 
 {ID} {
 	printf("ID: %s\n", yytext);
-	yylval.text = (char *) malloc (sizeof(char) * strlen(yytext));
-	strcpy(yylval.text, yytext);
+	yylval.string = (char *) malloc (sizeof(char) * strlen(yytext));
+	strcpy(yylval.string, yytext);
 	return TOK_ID;
 }
 
