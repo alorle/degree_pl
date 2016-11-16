@@ -1,9 +1,14 @@
 %{
 #include <stdio.h>
 
-#define YYSTYPE char *
-extern File* yyin;
+FILE *yyin;
+
+void yyerror(char *s);
 %}
+
+%union {
+	char *text;
+};
 
 /* Tokens */
 %token TOK_ID
@@ -70,7 +75,9 @@ extern File* yyin;
 
 %%
 
-desc_algoritmo:{printf("Adios");};
+desc_algoritmo: TOK_R_ALGORITMO TOK_ID TOK_R_FALGORITMO {
+	printf("ALGORITMO con nombre %s\n", yylval.text);
+};
 
 %%
 
@@ -80,13 +87,13 @@ int main(int argc, char **argv) {
 	yyin = (argc > 0) ? fopen(argv[0], "r") : stdin;
 
 	if (yyin == NULL) {
-    printf("I can't input file!");
-		return -1;
+        printf("I can't input file!");
+        return -1;
 	}
 	
-  yyparse();
+    yyparse();
 }
 
-yyerror(char *s) {
-  printf("%s\n", s);
+void yyerror(char *s) {
+    printf("ERROR: %s\n", s);
 }

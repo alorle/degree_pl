@@ -178,6 +178,7 @@ SEPARATOR		" "|\t|\n
 
 {R_ALGORITMO} {
 	printf("RESERVED: algoritmo = %s\n", yytext);
+	return TOK_R_ALGORITMO;
 }
 
 {R_BOOLEANO} {
@@ -230,6 +231,7 @@ R_DEV {
 
 {R_FALGORITMO} {
 	printf("RESERVED: falgoritmo = %s\n", yytext);
+	return TOK_R_FALGORITMO;
 }
 
 {R_FCONST} {
@@ -334,6 +336,9 @@ R_DEV {
 
 {ID} {
 	printf("ID: %s\n", yytext);
+	yylval.text = (char *) malloc (sizeof(char) * strlen(yytext));
+	strcpy(yylval.text, yytext);
+	return TOK_ID;
 }
 
 {SPECIAL} {

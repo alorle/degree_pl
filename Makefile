@@ -17,6 +17,9 @@ test-scanner: scanner
 test-parser: parser
 	./parser
 
+test: compiler
+	./compiler program1.alg
+
 clean:
 	rm -rf scanner scanner.c scanner.o parser parser.tab.c parser.tab.h compiler
 

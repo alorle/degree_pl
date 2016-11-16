@@ -6,3 +6,4 @@ parser
 parser.tab.c
 parser.tab.h
 compiler
+*.alg
