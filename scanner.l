@@ -1,9 +1,10 @@
 %{
-	#include <string.h>
+#include <string.h>
+#include "parser.tab.h"
 
-	typedef int bool;
-	#define TRUE 1
-	#define FALSE 0
+typedef int bool;
+#define TRUE 1
+#define FALSE 0
 %}
 
 /* Alphabet */
@@ -84,6 +85,7 @@ SEPARATOR		" "|\t|\n
 
 {COMMENT} {
 	printf("COMMENT: %s\n", yytext);
+	return TOK_COMMENT;
 }
 
 {OP_ASSIGNAMENT} {
@@ -342,9 +344,3 @@ R_DEV {
 }
 
 %%
-
-int main( int argc, char **argv ) {
-	++argv, --argc;
-	yyin = (argc > 0) ? fopen(argv[0], "r") : stdin;
-	yylex();
-}
