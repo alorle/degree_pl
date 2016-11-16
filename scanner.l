@@ -308,75 +308,94 @@ R_DEV {
 }
 
 {R_FUNCION} {
-	printf("RESERVED: funcion = %s\n", yytext); 
+	printf("RESERVED: funcion = %s\n", yytext);
+	return TOK_R_FUNCION; 
 }
 
 {R_FVAR} {
 	printf("RESERVED: fvar = %s\n", yytext); 
+	return TOK_R_FVAR;
 }
 
 {R_HACER} {
 	printf("RESERVED: hacer = %s\n", yytext); 
+	return TOK_R_HACER;
 }
 
 {R_HASTA} {
 	printf("RESERVED: hasta = %s\n", yytext); 
+	return TOK_R_HASTA;
 }
 
 {R_MIENTRAS} {
 	printf("RESERVED: mientras = %s\n", yytext); 
+	return TOK_R_MIENTRAS;
 }
 
 {R_MOD} {
 	printf("RESERVED: mod = %s\n", yytext); 
+	return TOK_R_MOD;
 }
 
 {R_NO} {
 	printf("RESERVED: no = %s\n", yytext); 
+	return TOK_R_NO;
 }
 
 {R_O} {
 	printf("RESERVED: o = %s\n", yytext); 
+	return TOK_R_O;
 }
 
 {R_PARA} {
 	printf("RESERVED: para = %s\n", yytext); 
+	return TOK_R_PARA;
 }
 
 {R_REAL} {
 	printf("RESERVED: real = %s\n", yytext); 
+	return TOK_R_REAL;
 }
 
 {R_REF} {
 	printf("RESERVED: ref = %s\n", yytext); 
+	return TOK_R_REF;
 }
 
 {R_SAL} {
 	printf("RESERVED: sal = %s\n", yytext); 
+	return TOK_R_SAL;
 }
 
 {R_SI} {
 	printf("RESERVED: si = %s\n", yytext); 
+	return TOK_R_SI;
 }
 
 {R_TABLA} {
 	printf("RESERVED: tabla = %s\n", yytext); 
+	return TOK_R_TABLA;
 }
 
 {R_TIPO} {
 	printf("RESERVED: tipo = %s\n", yytext);
+	//TODO: ¿ como pasamos el tipo ?
+	return TOK_R_TIPO;
 }
 
 {R_TUPLA} {
 	printf("RESERVED: tupla = %s\n", yytext);
+	return TOK_R_TUPLA;
 }
 
 {R_VAR} {
 	printf("RESERVED: var = %s\n", yytext);
+	return TOK_R_VAR;
 }
 
 {R_Y} {
 	printf("RESERVED: y = %s\n", yytext);
+	return TOK_R_Y;
 }
 
 {ID} {
