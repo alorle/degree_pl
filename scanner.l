@@ -90,42 +90,52 @@ SEPARATOR		" "|\t|\n
 
 {OP_ASSIGNAMENT} {
 	printf("OP asignación: %s\n", yytext);
+	return TOK_OP_ASSIGNAMENT;
 }
 
 {OP_SEQU_COMPOS} {
 	printf("OP composición secuencial: %s\n", yytext);
+	return TOK_OP_SEQU_COMPOS;
 }
 
 {OP_SEPARATOR} {
 	printf("OP separador: %s\n", yytext);
+	return TOK_OP_SEPARATOR;
 }
 
 {OP_SUBRANGE} {
 	printf("OP subrango: %s\n", yytext);
+	return TOK_OP_SUBRANGE;
 }
 
 {OP_VAR_TYPE_DEF} {
 	printf("OP definición de tipo de una variable: %s\n", yytext);
+	return TOK_OP_VAR_TYPE_DEF;
 }
 
 {OP_THEN} {
 	printf("OP entonces: %s\n", yytext);
+	return TOK_OP_THEN;
 }
 
 {OP_ELSE_IF} {
 	printf("OP si no si: %s\n", yytext);
+	return TOK_OP_ELSE_IF;
 }
 
 {OP_TYPE_DEFINITION} {
 	printf("OP creación de tipo: %s\n", yytext);
+	return TOK_OP_TYPE_DEFINITION;
 }
 
 {OP_ARRAY_INIT} {
 	printf("OP inicio de array: %s\n", yytext);
+	return TOK_OP_ARRAY_INIT;
 }
 
 {OP_ARRAY_CLOSE} {
 	printf("OP fin de array: %s\n", yytext);
+	return TOK_OP_ARRAY_CLOSE;
 }
 
 {LITERAL_INT} {
@@ -145,11 +155,17 @@ SEPARATOR		" "|\t|\n
 	}
 
 	printf("LITERAL_INT: %ld\n", value);
+
+	yylval.integer = value;
+	return TOK_LITERAL_INT;
 }
 
 {LITERAL_REAL} {
 	double value = atof(yytext);
 	printf("LITERAL_REAL: %f\n", value);
+	
+	yylval.real = value;
+	return TOK_LITERAL_REAL;
 }
 
 {LITERAL_BOOL} {
@@ -159,21 +175,31 @@ SEPARATOR		" "|\t|\n
 	}
 
 	printf("LITERAL_BOOL: %s (%d)\n", yytext, value);
+	
+	yylval.boolean = value;
+	return TOK_LITERAL_BOOL;
 }
 
 {LITERAL_CHAR} {
 	char value = yytext[1];
 	printf("LITERAL_CHAR: %c\n", value);
+	
+	yylval.character = value;
+	return TOK_LITERAL_CHAR;
 }
 
 {LITERAL_STR} {
 	char* value = yytext+1;
 	value[strlen(value) - 1] = '\0';
 	printf("LITERAL_STR: %s\n", value);
+	
+	yylval.string = value;
+	return TOK_LITERAL_STR;
 }
 
 {R_ACCION} {
 	printf("RESERVED: accion = %s\n", yytext);
+	return TOK_R_ACCION;
 }
 
 {R_ALGORITMO} {
@@ -183,50 +209,62 @@ SEPARATOR		" "|\t|\n
 
 {R_BOOLEANO} {
 	printf("RESERVED: booleano = %s\n", yytext);
+	return TOK_R_BOOLEANO;
 }
 
 {R_CADENA} {
 	printf("RESERVED: cadena = %s\n", yytext);
+	return TOK_R_CADENA;
 }
 
 {R_CARACTER} {
 	printf("RESERVED: caracter = %s\n", yytext);
+	return TOK_R_CARACTER;
 }
 
 {R_CONST} {
 	printf("RESERVED: const = %s\n", yytext);
+	return TOK_R_CONST;
 }
 
 {R_CONTINUAR} {
 	printf("RESERVED: continuar = %s\n", yytext);
+	return TOK_R_CONTINUAR;
 }
 
 {R_DE} {
 	printf("RESERVED: de = %s\n", yytext);
+	return TOK_R_DE;
 }
 
 R_DEV {
-	printf("RESERVED: dev = %s\n", yytext); 
+	printf("RESERVED: dev = %s\n", yytext);
+	return TOK_R_DEV;
 }
 
 {R_DIV} {
 	printf("RESERVED: div = %s\n", yytext);
+	return TOK_R_DIV;
 }
 
 {R_ES} {
 	printf("RESERVED: es = %s\n", yytext);
+	return TOK_R_ES;
 }
 
 {R_ENT} {
 	printf("RESERVED: ent = %s\n", yytext);
+	return TOK_R_ENT;
 }
 
 {R_ENTERO} {
 	printf("RESERVED: entero = %s\n", yytext);
+	return TOK_R_ENTERO;
 }
 
 {R_FACCION} {
 	printf("RESERVED: faccion = %s\n", yytext);
+	return TOK_R_FACCION;
 }
 
 {R_FALGORITMO} {
@@ -236,30 +274,37 @@ R_DEV {
 
 {R_FCONST} {
 	printf("RESERVED: fconst = %s\n", yytext);
+	return TOK_R_FCONST;
 }
 
 {R_FFUNCION} {
 	printf("RESERVED: ffuncion = %s\n", yytext);
+	return TOK_R_FFUNCION;
 }
 
 {R_FMIENTRAS} {
 	printf("RESERVED: fmientras = %s\n", yytext);
+	return TOK_R_FMIENTRAS;
 }
 
 {R_FPARA} {
 	printf("RESERVED: fpara = %s\n", yytext);
+	return TOK_R_FPARA;
 }
 
 {R_FSI} {
 	printf("RESERVED: fsi = %s\n", yytext);
+	return TOK_R_FSI;
 }
 
 {R_FTIPO} {
-	printf("RESERVED: ftipo = %s\n", yytext); 
+	printf("RESERVED: ftipo = %s\n", yytext);
+	return TOK_R_FTIPO;
 }
 
 {R_FTUPLA} {
-	printf("RESERVED: ftupla = %s\n", yytext); 
+	printf("RESERVED: ftupla = %s\n", yytext);
+	return TOK_R_FTUPLA;
 }
 
 {R_FUNCION} {
