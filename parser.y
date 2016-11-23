@@ -7,11 +7,11 @@ void yyerror(char *s);
 %}
 
 %union {
-	char character;
-	char *string;
-    int boolean;
-	double real;
-	long int integer;
+	char caracter;
+	char *cadena;
+    int booleano;
+	double numero_real;
+	long int numero_entero;
 };
 
 /* Tokens */
@@ -25,8 +25,8 @@ void yyerror(char *s);
 
 %%
 
-desc_algoritmo: TOK_R_ALGORITMO TOK_ID TOK_R_FALGORITMO {
-	printf("ALGORITMO con nombre %s\n", yylval.string);
+desc_algoritmo: TOK_R_ALGORITMO TOK_ID cabecera_alg bloque_alg TOK_R_FALGORITMO {
+	printf("ALGORITMO con nombre %s\n", yylval.cadena);
 };
 
 %%

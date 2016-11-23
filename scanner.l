@@ -156,7 +156,7 @@ SEPARATOR		" "|\t|\n
 
 	printf("LITERAL_INT: %ld\n", value);
 
-	yylval.integer = value;
+	yylval.numero_entero = value;
 	return TOK_LITERAL_INT;
 }
 
@@ -164,7 +164,7 @@ SEPARATOR		" "|\t|\n
 	double value = atof(yytext);
 	printf("LITERAL_REAL: %f\n", value);
 	
-	yylval.real = value;
+	yylval.numero_real = value;
 	return TOK_LITERAL_REAL;
 }
 
@@ -176,7 +176,7 @@ SEPARATOR		" "|\t|\n
 
 	printf("LITERAL_BOOL: %s (%d)\n", yytext, value);
 	
-	yylval.boolean = value;
+	yylval.booleano = value;
 	return TOK_LITERAL_BOOL;
 }
 
@@ -184,7 +184,7 @@ SEPARATOR		" "|\t|\n
 	char value = yytext[1];
 	printf("LITERAL_CHAR: %c\n", value);
 	
-	yylval.character = value;
+	yylval.caracter = value;
 	return TOK_LITERAL_CHAR;
 }
 
@@ -193,7 +193,7 @@ SEPARATOR		" "|\t|\n
 	value[strlen(value) - 1] = '\0';
 	printf("LITERAL_STR: %s\n", value);
 	
-	yylval.string = value;
+	yylval.cadena = value;
 	return TOK_LITERAL_STR;
 }
 
@@ -400,8 +400,8 @@ R_DEV {
 
 {ID} {
 	printf("ID: %s\n", yytext);
-	yylval.string = (char *) malloc (sizeof(char) * strlen(yytext));
-	strcpy(yylval.string, yytext);
+	yylval.cadena = (char *) malloc (sizeof(char) * strlen(yytext));
+	strcpy(yylval.cadena, yytext);
 	return TOK_ID;
 }
 
