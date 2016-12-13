@@ -77,6 +77,14 @@ OP_ELSE_IF			"\[\]"
 OP_TYPE_DEFINITION	"="
 OP_ARRAY_INIT		"\["
 OP_ARRAY_CLOSE		"\]"
+OP_DOT				"."
+OP_REL				(<|>|=|<>|>=|<=)
+OP_PAREN_OPEN		"("
+OP_PAREN_CLOSE		")"
+OP_PLUS				"+"
+OP_MINUS			"-"
+OP_TIMES			"*"
+OP_DIVIDE			"/"
 
 /* Ignored */
 SEPARATOR		" "|\t|\n
@@ -136,6 +144,46 @@ SEPARATOR		" "|\t|\n
 {OP_ARRAY_CLOSE} {
 	printf("OP fin de array: %s\n", yytext);
 	return TOK_OP_ARRAY_CLOSE;
+}
+
+{OP_DOT} {
+	printf("OP punto: %s\n", yytext);
+	return TOK_OP_DOT;
+}
+
+{OP_REL} {
+	printf("OP relacional: %s\n", yytext);
+	return TOK_OP_REL;
+}
+
+{OP_PAREN_OPEN} {
+	printf("OP inicio de parentesis: %s\n", yytext);
+	return TOK_OP_PAREN_OPEN;
+}
+
+{OP_PAREN_CLOSE} {
+	printf("OP fin de parentesis: %s\n", yytext);
+	return TOK_OP_PAREN_CLOSE;
+}
+
+{OP_PLUS} {
+	printf("OP más: %s\n", yytext);
+	return TOK_OP_PLUS;
+}
+
+{OP_MINUS} {
+	printf("OP menos: %s\n", yytext);
+	return TOK_OP_MINUS;
+}
+
+{OP_TIMES} {
+	printf("OP multiplicación: %s\n", yytext);
+	return TOK_OP_TIMES;
+}
+
+{OP_DIVIDE} {
+	printf("OP división: %s\n", yytext);
+	return TOK_OP_DIVIDE;
 }
 
 {LITERAL_INT} {

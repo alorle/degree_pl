@@ -7,7 +7,7 @@ parser:
 	gcc parser.tab.c -o parser
 
 compiler:
-	bison -d parser.y
+	bison -d -v parser.y
 	flex -i --outfile=scanner.c scanner.l
 	gcc parser.tab.c scanner.c -lfl -o compiler
 
