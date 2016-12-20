@@ -9,13 +9,17 @@ parser:
 compiler:
 	bison -d -v parser.y
 	flex -i --outfile=scanner.c scanner.l
-	gcc parser.tab.c scanner.c SymTable.c -lfl -o compiler
+	gcc parser.tab.c scanner.c SymTable.c QuadTable.c -lfl -o compiler
 
 test-scanner: scanner
 	./scanner scanner.input
 
 test-parser: parser
-	./parser
+	gcc parser.tab.c -o parser
+
+test-quad:
+	gcc QuadTable.c -o quad
+	./quad
 
 test1: compiler
 	./compiler program1.alg
