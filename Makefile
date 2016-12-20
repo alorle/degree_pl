@@ -9,7 +9,7 @@ parser:
 compiler:
 	bison -d -v parser.y
 	flex -i --outfile=scanner.c scanner.l
-	gcc parser.tab.c scanner.c -lfl -o compiler
+	gcc parser.tab.c scanner.c SymTable.c -lfl -o compiler
 
 test-scanner: scanner
 	./scanner scanner.input

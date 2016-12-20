@@ -1,7 +1,16 @@
 %{
 #include <stdio.h>
+#include "SymTable.h"
 
 FILE *yyin;
+
+#define ENTERO 1
+#define REAL 2
+#define BOOLEANO 3
+#define CARACTER 4
+#define CADENA 5
+
+struct tablaSym *tablaSimbolos;
 
 void yyerror(char *s);
 %}
@@ -15,12 +24,17 @@ void yyerror(char *s);
 /* Operators */
 %token TOK_OP_ASSIGNAMENT TOK_OP_SEQU_COMPOS TOK_OP_SEPARATOR TOK_OP_SUBRANGE TOK_OP_VAR_TYPE_DEF TOK_OP_THEN TOK_OP_ELSE_IF TOK_OP_TYPE_DEFINITION TOK_OP_ARRAY_INIT TOK_OP_ARRAY_CLOSE TOK_OP_DOT TOK_OP_REL TOK_OP_PAREN_OPEN TOK_OP_PAREN_CLOSE TOK_OP_PLUS TOK_OP_MINUS TOK_OP_TIMES TOK_OP_DIVIDE
 
+%type <tipo> d_tipo
+%type <tipo> tipo_base
+%type <tipo> lista_id
+
 %union {
 	char caracter;
 	char *cadena;
     int booleano;
 	double numero_real;
 	long int numero_entero;
+	int tipo;
 };
 
 %%
@@ -88,25 +102,20 @@ lista_d_tipo: 		  /* vacío */
 	printf("PARSER || DECLARACION CONSTANTE con nombre %s\n", yylval.cadena);
 };
 
-d_tipo: 			  TOK_R_TUPLA lista_campos TOK_R_FTUPLA
-					| TOK_R_TABLA TOK_OP_ARRAY_INIT expresion_t TOK_OP_SUBRANGE expresion_t TOK_OP_ARRAY_CLOSE TOK_R_DE d_tipo
-					| TOK_ID
-					| expresion_t TOK_OP_SUBRANGE expresion_t
-					| TOK_R_REF d_tipo
-					| tipo_base
-{
-	printf("PARSER || D_TIPO %s\n", yylval.cadena);
-};
+d_tipo: 			  TOK_R_TUPLA lista_campos TOK_R_FTUPLA  {$$ = -1;}
+					| TOK_R_TABLA TOK_OP_ARRAY_INIT expresion_t TOK_OP_SUBRANGE expresion_t TOK_OP_ARRAY_CLOSE TOK_R_DE d_tipo  {$$ = -1;}
+					| TOK_ID {$$ = -1;}
+					| expresion_t TOK_OP_SUBRANGE expresion_t {$$ = -1;}
+					| TOK_R_REF d_tipo {$$ = -1;}
+					| tipo_base {$$ = $1;}
+					;
 
-tipo_base: 			  TOK_R_ENTERO
-					| TOK_R_REAL
-					| TOK_R_BOOLEANO
-					| TOK_R_CARACTER
-					| TOK_R_CADENA
-{
-	// TODODODODODODODODODDOODOD
-	printf("PARSER || TIPO BÁSICO\n");
-};
+tipo_base: 			  TOK_R_ENTERO 			{$$ = ENTERO;}
+					| TOK_R_REAL			{$$ = REAL;}
+					| TOK_R_BOOLEANO		{$$ = BOOLEANO;}
+					| TOK_R_CARACTER		{$$ = CARACTER;}
+					| TOK_R_CADENA			{$$ = CADENA;}
+					;
 
 expresion_t: 		  expresion
 					| TOK_LITERAL_CHAR
@@ -136,19 +145,14 @@ literal:			  TOK_LITERAL_INT
 };
 
 lista_d_var: 		  /* vacío */
-					| lista_id TOK_OP_VAR_TYPE_DEF TOK_ID TOK_OP_SEQU_COMPOS lista_d_var
-					| lista_id TOK_OP_VAR_TYPE_DEF d_tipo TOK_OP_SEQU_COMPOS lista_d_var
-{
-	printf("PARSER || LISTA DE VARIABLES\n");
-};
+					| lista_id TOK_OP_SEQU_COMPOS lista_d_var {	printf("PARSER || Lista de variables de tipo %d\n", $1); }
+					;
 
-lista_id: 			  TOK_ID
-					| TOK_ID_BOOL
-					| TOK_ID TOK_OP_SEPARATOR lista_id
-					| TOK_ID_BOOL TOK_OP_SEPARATOR lista_id
-{
-	printf("PARSER || LISTA DE IDENTIFICADORES comienza por %s\n", $1);
-};
+lista_id: 			  TOK_ID TOK_OP_VAR_TYPE_DEF d_tipo { InsertarVariable(&tablaSimbolos, $1, $3);	$$ = $3; }
+					| TOK_ID_BOOL TOK_OP_VAR_TYPE_DEF d_tipo { InsertarVariable(&tablaSimbolos, $1, $3); $$ = $3; }
+					| TOK_ID TOK_OP_SEPARATOR lista_id { InsertarVariable(&tablaSimbolos, $1, $3);	$$ = $3; }
+					| TOK_ID_BOOL TOK_OP_SEPARATOR lista_id { InsertarVariable(&tablaSimbolos, $1, $3);	$$ = $3; }
+					;
 
 decl_ent_sal:		  decl_ent
 					| decl_sal
@@ -316,14 +320,16 @@ l_ll:				  expresion TOK_OP_SEPARATOR l_ll
 
 int main(int argc, char **argv) {
 	++argv, --argc;
-	
+
 	yyin = (argc > 0) ? fopen(argv[0], "r") : stdin;
 
 	if (yyin == NULL) {
         printf("PARSER || I can't input file!");
         return -1;
 	}
-	
+
+	Inicializa(&tablaSimbolos);
+
     yyparse();
 }
 
