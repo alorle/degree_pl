@@ -17,6 +17,7 @@ CHAR				{UPPER}|{LOWER}
 
 /* Tokens */
 ID					{CHAR}({CHAR}|{DIGIT})*
+ID_BOOL				(b|B)({CHAR}|{DIGIT})*
 LITERAL_INT			(\+|\-)?{NUMBER}*((e|E){NUMBER}*)?
 LITERAL_REAL		(\+|\-)?{NUMBER}*(\.{NUMBER}*)?((e|E){NUMBER}*)?
 LITERAL_BOOL		"verdadero"|"falso"
@@ -444,6 +445,13 @@ R_DEV {
 {R_Y} {
 	printf("RESERVED: y = %s\n", yytext);
 	return TOK_R_Y;
+}
+
+{ID_BOOL} {
+	printf("ID_BOOL: %s\n", yytext);
+	yylval.cadena = (char *) malloc (sizeof(char) * strlen(yytext));
+	strcpy(yylval.cadena, yytext);
+	return TOK_ID_BOOL;
 }
 
 {ID} {
