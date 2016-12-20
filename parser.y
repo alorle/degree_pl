@@ -135,14 +135,12 @@ lista_d_cte:		  /* vacío */
 	printf("PARSER || LISTA DE CONSTANTES\n");
 };
 
-literal:			  TOK_LITERAL_INT
-					| TOK_LITERAL_REAL
-					| TOK_LITERAL_BOOL
-					| TOK_LITERAL_CHAR
-					| TOK_LITERAL_STR
-{
-	printf("PARSER || LITERAL: %s\n", $1);
-};
+literal:			  TOK_LITERAL_INT	{ printf("PARSER || LITERAL: %ld\n", $1); }
+					| TOK_LITERAL_REAL	{ printf("PARSER || LITERAL: %f\n", $1); }
+					| TOK_LITERAL_BOOL	{ printf("PARSER || LITERAL: %d (booleano\n", $1); }
+					| TOK_LITERAL_CHAR	{ printf("PARSER || LITERAL: %c\n", $1); }
+					| TOK_LITERAL_STR	{ printf("PARSER || LITERAL: %s\n", $1); }
+					;
 
 lista_d_var: 		  /* vacío */
 					| lista_id TOK_OP_SEQU_COMPOS lista_d_var {	printf("PARSER || Lista de variables de tipo %d\n", $1); }
