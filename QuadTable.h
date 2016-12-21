@@ -5,39 +5,33 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct quad
+typedef struct
 {
     int op;
-    int result;
     int arg1;
     int arg2;
-};
+    int result;
+} quad;
 
-struct quadWrapper
-{
-    struct quad quad;
-    struct quadWrapper *siguiente;
-};
-
-struct tablaQuad
+typedef struct
 {
     int size;
-    struct quadWrapper *quadWrapper;
-};
+    quad array[100];
+} quad_table;
 
 /**
  * Inicializar la tabla de cuadruplas a null
  */
-void InicializaQ(struct tablaQuad *);
+void InicializaQ(quad_table *);
 
 /**
  * Imprimir la tabla de cuadruplas completa
  */
-void ImprimeTablaQ(struct tablaQuad *);
+void ImprimeTablaQ(quad_table *);
 
 /**
  * Insertar nueva cuadrupla
  */
-void InsertarQ(struct tablaQuad *, int, int, int, int);
+void InsertarQ(quad_table *, int, int, int, int);
 
 #endif
