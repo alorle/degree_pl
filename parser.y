@@ -146,10 +146,34 @@ lista_d_var: 		  /* vacío */
 					| lista_id TOK_OP_SEQU_COMPOS lista_d_var {	printf("PARSER || Lista de variables de tipo %d\n", $1); }
 					;
 
-lista_id: 			  TOK_ID TOK_OP_VAR_TYPE_DEF d_tipo { InsertarVariable(&tablaSimbolos, $1, $3);	$$ = $3; }
-					| TOK_ID_BOOL TOK_OP_VAR_TYPE_DEF d_tipo { InsertarVariable(&tablaSimbolos, $1, $3); $$ = $3; }
-					| TOK_ID TOK_OP_SEPARATOR lista_id { InsertarVariable(&tablaSimbolos, $1, $3);	$$ = $3; }
-					| TOK_ID_BOOL TOK_OP_SEPARATOR lista_id { InsertarVariable(&tablaSimbolos, $1, $3);	$$ = $3; }
+lista_id: 			  TOK_ID TOK_OP_VAR_TYPE_DEF d_tipo {
+						if (InsertarVariable(&tablaSimbolos, $1, $3))
+							ImprimeTabla(&tablaSimbolos);
+						else
+							yyerror("Variable ya definida anteriormente");
+						$$ = $3;
+					}
+					| TOK_ID_BOOL TOK_OP_VAR_TYPE_DEF d_tipo {
+						if (InsertarVariable(&tablaSimbolos, $1, $3))
+							ImprimeTabla(&tablaSimbolos);
+						else
+							yyerror("Variable ya definida anteriormente");
+						$$ = $3;
+					}
+					| TOK_ID TOK_OP_SEPARATOR lista_id {
+						if (InsertarVariable(&tablaSimbolos, $1, $3))
+							ImprimeTabla(&tablaSimbolos);
+						else
+							yyerror("Variable ya definida anteriormente");
+						$$ = $3;
+					}
+					| TOK_ID_BOOL TOK_OP_SEPARATOR lista_id {
+						if (InsertarVariable(&tablaSimbolos, $1, $3))
+							ImprimeTabla(&tablaSimbolos);
+						else
+							yyerror("Variable ya definida anteriormente");
+						$$ = $3;
+					}
 					;
 
 decl_ent_sal:		  decl_ent
@@ -332,5 +356,5 @@ int main(int argc, char **argv) {
 }
 
 void yyerror(char *s) {
-    printf("PARSER || ERROR: %s\n", s);
+	fprintf(stderr, "\033[31mERROR: %s\033[0m\n", s);
 }
