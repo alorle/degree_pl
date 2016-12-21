@@ -53,7 +53,7 @@ void InsertarNuevo(struct tablaSym **tabla, struct tablaSym *nuevaCosa)
     }
 }
 
-void InsertarVariable(struct tablaSym **tabla, char *nombre, int tipo)
+int InsertarVariable(struct tablaSym **tabla, char *nombre, int tipo)
 {
     if (!(Existe(nombre, *tabla)))
     {
@@ -66,7 +66,10 @@ void InsertarVariable(struct tablaSym **tabla, char *nombre, int tipo)
         temp->simb.var.id = sid;
         InsertarNuevo(tabla, temp);
         sid = sid + 1;
-    }
+        return 1;
+    }    //printf("Elemento ya insertado previamente");
+        return 0;
+    
 }
 
 int Existe(char *name, struct tablaSym *tabla)

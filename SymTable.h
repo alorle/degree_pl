@@ -25,7 +25,7 @@ struct tablaSym
 void Inicializa(struct tablaSym **tabla);
 
 //insertar variable en tabla
-void InsertarVariable(struct tablaSym **, char *, int);
+int InsertarVariable(struct tablaSym **, char *, int);
 
 //falta insertar tipo e insertar funcion
 
