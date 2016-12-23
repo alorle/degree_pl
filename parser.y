@@ -1,6 +1,7 @@
 %{
 #include <stdio.h>
 #include "SymTable.h"
+#include "QuadTable.h"
 
 FILE *yyin;
 
@@ -10,7 +11,13 @@ FILE *yyin;
 #define CARACTER 4
 #define CADENA 5
 
+struct operando_struct {
+	int id;
+	int tipo;
+};
+
 struct tablaSym *tablaSimbolos;
+quad_table tablaQuad;
 
 void yyerror(char *s);
 %}
@@ -27,6 +34,8 @@ void yyerror(char *s);
 %type <tipo> d_tipo
 %type <tipo> tipo_base
 %type <tipo> lista_id
+%type <op> exp_a
+%type <op> operando
 
 %union {
 	char caracter;
@@ -35,6 +44,7 @@ void yyerror(char *s);
 	double numero_real;
 	long int numero_entero;
 	int tipo;
+	struct operando_struct *op;
 };
 
 %%
@@ -200,7 +210,10 @@ expresion:		   	  exp_a
     printf("PARSER || EXPRESIÓN\n");
 };
 
-exp_a: 				  exp_a TOK_OP_PLUS exp_a
+exp_a: 				  exp_a TOK_OP_PLUS exp_a {
+						printf("Operando 1: %d %d\n", $1->id, $1->tipo);
+						printf("Operando 2: %d %d\n", $3->id, $3->tipo);
+					}
 					| exp_a TOK_OP_MINUS exp_a
 					| exp_a TOK_OP_TIMES exp_a
 					| exp_a TOK_OP_DIVIDE exp_a
@@ -226,7 +239,11 @@ exp_b: 				  exp_b TOK_R_Y exp_b
     printf("PARSER || EXPRESIÓN BOOLEANA\n");
 };
 
-operando:			  TOK_ID
+operando:			  TOK_ID {
+						union simbolo *sym = BuscarElemento($1, tablaSimbolos);
+						$$->id = sym->var.id;
+						$$->tipo = sym->var.type;
+					}
 					| operando TOK_OP_DOT operando
 					| operando TOK_OP_ARRAY_INIT expresion TOK_OP_ARRAY_CLOSE
 					| operando TOK_R_REF
@@ -351,6 +368,7 @@ int main(int argc, char **argv) {
 	}
 
 	Inicializa(&tablaSimbolos);
+	InicializaQ(&tablaQuad);
 
     yyparse();
 }
