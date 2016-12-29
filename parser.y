@@ -1,7 +1,7 @@
 %{
 #include <stdio.h>
 #include "SymTable.h"
-#include "QuadTable.h"
+#include "quad_table.h"
 
 FILE *yyin;
 
@@ -17,7 +17,7 @@ struct operando_struct {
 };
 
 struct tablaSym *tablaSimbolos;
-quad_table tablaQuad;
+quad_table quadTable;
 
 void yyerror(char *s);
 %}
@@ -374,7 +374,7 @@ int main(int argc, char **argv) {
     }
 
     Inicializa(&tablaSimbolos);
-    InicializaQ(&tablaQuad);
+    init_QT(&quadTable);
 
     yyparse();
 }

@@ -1,5 +1,5 @@
-#ifndef QuadTable_h
-#define QuadTable_h
+#ifndef QUAD_TABLE_H
+#define QUAD_TABLE_H
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,16 +22,16 @@ typedef struct
 /**
  * Inicializar la tabla de cuadruplas a null
  */
-void InicializaQ(quad_table *);
+void init_QT(quad_table *);
 
 /**
  * Imprimir la tabla de cuadruplas completa
  */
-void ImprimeTablaQ(quad_table *);
+void print_QT(quad_table *);
 
 /**
  * Insertar nueva cuadrupla
  */
-void InsertarQ(quad_table *, int, int, int, int);
+void insert_QT(quad_table *, int, int, int, int);
 
 #endif
