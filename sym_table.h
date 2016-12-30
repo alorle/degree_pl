@@ -41,16 +41,34 @@ typedef struct
 
 symbol_node *last;
 
+/**
+ * Inicializar la tabla de símbolos
+ */
 void init_TS(sym_table *);
 
+/**
+ * Imprimir la tabla de símbolos completa
+ */
 void print_TS(sym_table *);
 
+/**
+ * Insertar un nuevo símbolo en la tabla
+ */
 int insert_TS(sym_table *, symbol, sym_type);
 
+/**
+ * Insertar una nueva varaible como símbolo de la tabla
+ */
 int insert_var_TS(sym_table *, char *, int);
 
+/**
+ * Comprueba la existencia de una variable del mismo nombre
+ */
 int exists_var(sym_table *, char *);
 
+/**
+ * Obtiene la referencia a la variable del mismo nombre
+ */
 symbol_node *get_var(sym_table *, char *);
 
 #endif
