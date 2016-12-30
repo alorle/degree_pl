@@ -1,6 +1,6 @@
 %{
 #include <stdio.h>
-#include "SymTable.h"
+#include "sym_table.h"
 #include "quad_table.h"
 
 FILE *yyin;
@@ -16,7 +16,7 @@ struct operando_struct {
     int tipo;
 };
 
-struct tablaSym *tablaSimbolos;
+sym_table symTable;
 quad_table quadTable;
 
 void yyerror(char *s);
@@ -151,29 +151,29 @@ lista_d_var:        /* vacío */ {}
                     };
 
 lista_id:           TOK_ID TOK_OP_VAR_TYPE_DEF d_tipo {
-                        if (InsertarVariable(&tablaSimbolos, $1, $3))
-                            ImprimeTabla(&tablaSimbolos);
+                        if (insert_var_TS(&symTable, $1, $3) >= 0)
+                            print_TS(&symTable);
                         else
                             yyerror("Variable ya definida anteriormente");
                         $$ = $3;
                     }
                     | TOK_ID_BOOL TOK_OP_VAR_TYPE_DEF d_tipo {
-                        if (InsertarVariable(&tablaSimbolos, $1, $3))
-                            ImprimeTabla(&tablaSimbolos);
+                        if (insert_var_TS(&symTable, $1, $3) >= 0)
+                            print_TS(&symTable);
                         else
                             yyerror("Variable ya definida anteriormente");
                         $$ = $3;
                     }
                     | TOK_ID TOK_OP_SEPARATOR lista_id {
-                        if (InsertarVariable(&tablaSimbolos, $1, $3))
-                            ImprimeTabla(&tablaSimbolos);
+                        if (insert_var_TS(&symTable, $1, $3) >= 0)
+                            print_TS(&symTable);
                         else
                             yyerror("Variable ya definida anteriormente");
                         $$ = $3;
                     }
                     | TOK_ID_BOOL TOK_OP_SEPARATOR lista_id {
-                        if (InsertarVariable(&tablaSimbolos, $1, $3))
-                            ImprimeTabla(&tablaSimbolos);
+                        if (insert_var_TS(&symTable, $1, $3) >= 0)
+                            print_TS(&symTable);
                         else
                             yyerror("Variable ya definida anteriormente");
                         $$ = $3;
@@ -252,9 +252,9 @@ exp_b:              exp_b TOK_R_Y exp_b {
                     };
 
 operando:           TOK_ID {
-                        union simbolo *sym = BuscarElemento($1, tablaSimbolos);
-                        $$->id = sym->var.id;
-                        $$->tipo = sym->var.type;
+                        symbol_node *node = get_var(&symTable, $1);
+                        $$->id = node->id;
+                        $$->tipo = node->sym.var.type;
                     }
                     | operando TOK_OP_DOT operando {
                         // TODO
@@ -266,16 +266,16 @@ operando:           TOK_ID {
                         // TODO
                     };
 
-operando_b:         TOK_ID_BOOL{
+operando_b:         TOK_ID_BOOL {
                         // TODO
                     }
-                    | operando_b TOK_OP_DOT operando_b{
+                    | operando_b TOK_OP_DOT operando_b {
                         // TODO
                     }
-                    | operando_b TOK_OP_ARRAY_INIT expresion TOK_OP_ARRAY_CLOSE{
+                    | operando_b TOK_OP_ARRAY_INIT expresion TOK_OP_ARRAY_CLOSE {
                         // TODO
                     }
-                    | operando_b TOK_R_REF{
+                    | operando_b TOK_R_REF {
                         // TODO
                     };
 
@@ -373,7 +373,7 @@ int main(int argc, char **argv) {
         return -1;
     }
 
-    Inicializa(&tablaSimbolos);
+    init_TS(&symTable);
     init_QT(&quadTable);
 
     yyparse();

@@ -5,7 +5,7 @@ parser:
 	bison -d -v parser.y
 
 compiler: parser scanner
-	gcc parser.tab.c scanner.c SymTable.c quad_table.c -lfl -o compiler
+	gcc parser.tab.c scanner.c sym_table.c quad_table.c -lfl -o compiler
 
 test1: compiler
 	./compiler program1.alg
