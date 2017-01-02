@@ -16,7 +16,10 @@ void print_TS(sym_table *table)
         switch (temp->type)
         {
             case VARIABLE:
-                printf("SYM %d as varaible: name %s, type %d\n", temp->id, temp->sym.var.name, temp->sym.var.type);
+                if (strcmp("", temp->sym.var.name) == 0)
+                    printf("SYM %d as temp variable: type %d\n", temp->id, temp->sym.var.type);
+                else
+                    printf("SYM %d as variable: name %s, type %d\n", temp->id, temp->sym.var.name, temp->sym.var.type);
                 break;
             default:
                 fprintf(stderr, "ERROR: Unknown symbol type (%d)\n", temp->type);
@@ -48,7 +51,7 @@ int insert_TS(sym_table *table, symbol new_sym, sym_type type)
 
 int insert_var_TS(sym_table *table, char *name, int type)
 {
-    if (exists_var(table, name)) {
+    if (strcmp("", name) != 0 && exists_var(table, name)) {
         return -1;
     }
 

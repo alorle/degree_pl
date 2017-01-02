@@ -3,9 +3,22 @@
 
 #include <stdio.h>
 
+#define OP_NULL -1
+
+typedef enum
+{
+    QT_SUMA,
+    QT_RESTA,
+    QT_DIV_ENT,
+    QT_DIV_REAL,
+    QT_MULT,
+    QT_MOD,
+    QT_MINUS
+} operation;
+
 typedef struct
 {
-    int op;
+    operation op;
     int arg1;
     int arg2;
     int result;
@@ -30,6 +43,6 @@ void print_QT(quad_table *);
 /**
  * Insertar nueva cuadrupla
  */
-void insert_QT(quad_table *, int, int, int, int);
+void insert_QT(quad_table *, operation, int, int, int);
 
 #endif
