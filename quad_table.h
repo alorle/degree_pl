@@ -5,6 +5,7 @@
 
 #define OP_NULL -1
 
+
 typedef enum
 {
     QT_SUMA,
@@ -13,7 +14,8 @@ typedef enum
     QT_DIV_REAL,
     QT_MULT,
     QT_MOD,
-    QT_MINUS
+    QT_MINUS,
+    QT_ASSIG
 } operation;
 
 typedef struct

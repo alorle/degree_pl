@@ -16,6 +16,11 @@ struct operando_struct {
     int tipo;
 };
 
+struct expresion_struct {
+    int id;
+    int tipo;
+};
+
 sym_table symTable;
 quad_table quadTable;
 
@@ -36,6 +41,7 @@ void yyerror(char *s);
 %type <tipo> lista_id
 %type <op> exp_a
 %type <op> operando
+%type <exp> expresion
 
 %union {
     char caracter;
@@ -45,6 +51,7 @@ void yyerror(char *s);
     long int numero_entero;
     int tipo;
     struct operando_struct *op;
+    struct expresion_struct *exp;
 };
 
 %%
@@ -191,7 +198,10 @@ decl_sal:           TOK_R_SAL lista_d_var {
                         printf("PARSER || Declaraciones de salida\n");
                     };
 
-expresion:          exp_a {}
+expresion:          exp_a {
+                        $$->id = $1->id;
+                        $$->tipo = $1->tipo;
+                    }
                     | exp_b {}
                     | funcion_ll {};
 
@@ -346,14 +356,14 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                         if ($2->tipo == ENTERO) {
                             printf("DEBUG | Cambio de signo entero\n");
                             int newtemp = insert_var_TS(&symTable, "", ENTERO);
-                            insert_QT(&quadTable, QT_MINUS, $1->id, OP_NULL, newtemp);
+                            insert_QT(&quadTable, QT_MINUS, $2->id, OP_NULL, newtemp);
 
                             $$->id = newtemp;
                             $$->tipo = ENTERO;
                         } else if ($2->tipo == REAL) {
                             printf("DEBUG | Cambio de signo real\n");
                             int newtemp = insert_var_TS(&symTable, "", REAL);
-                            insert_QT(&quadTable, QT_MINUS, $1->id, OP_NULL, newtemp);
+                            insert_QT(&quadTable, QT_MINUS, $2->id, OP_NULL, newtemp);
 
                             $$->id = newtemp;
                             $$->tipo = REAL;
@@ -428,7 +438,16 @@ instruccion:        TOK_R_CONTINUAR {}
 
 asignacion:         operando TOK_OP_ASSIGNAMENT expresion {
                         printf("PARSER || Asignación de un operando aritmético\n");
+                        if ($1->tipo == $3->tipo ) 
+                            insert_QT(&quadTable,QT_ASSIG,$3->id,OP_NULL,$1->id);
+                        else
+                            yyerror("Tipos no compatibles para asignacion");
+                        printf("************************************************\n");
+                        print_QT(&quadTable);
+                        print_TS(&symTable);
+                        printf("************************************************\n");
                     }
+
                     | operando_b TOK_OP_ASSIGNAMENT expresion {
                         printf("PARSER || Asignación de un operando booleano\n");
                     };
