@@ -8,6 +8,7 @@
 
 typedef enum
 {
+    // ARITHMETIC OPERATORS
     QT_SUMA,
     QT_RESTA,
     QT_DIV_ENT,
@@ -15,8 +16,19 @@ typedef enum
     QT_MULT,
     QT_MOD,
     QT_MINUS,
-    QT_ASSIG
+    QT_ASSIG,
+    // BOOLEAN OPERATORS
+    QT_B_AND,
+    QT_B_OR,
+    QT_B_LESS,
+    QT_B_LESSE,
+    QT_B_GREATER,
+    QT_B_GREATERE,
+    QT_B_NOTE,
+    QT_B_E
+
 } operation;
+
 
 typedef struct
 {

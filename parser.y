@@ -41,6 +41,8 @@ void yyerror(char *s);
 %type <tipo> lista_id
 %type <op> exp_a
 %type <op> operando
+%type <op> exp_b
+%type <op> operando_b
 %type <exp> expresion
 
 %union {
@@ -202,7 +204,10 @@ expresion:          exp_a {
                         $$->id = $1->id;
                         $$->tipo = $1->tipo;
                     }
-                    | exp_b {}
+                    | exp_b {
+                        $$->id = $1->id;
+                        $$->tipo = $1->tipo;
+                    }
                     | funcion_ll {};
 
 exp_a:              exp_a TOK_OP_PLUS exp_a {
@@ -212,10 +217,16 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                             printf("DEBUG | Suma entera\n");
                             int newtemp = insert_var_TS(&symTable, "", ENTERO);
                             insert_QT(&quadTable, QT_SUMA, $1->id, $3->id, newtemp);
+
+                            $$->id = newtemp;
+                            $$->tipo = ENTERO;
                         } else if ($1->tipo == REAL || $3->tipo == REAL) {
                             printf("DEBUG | Suma real\n");
                             int newtemp = insert_var_TS(&symTable, "", REAL);
                             insert_QT(&quadTable, QT_SUMA, $1->id, $3->id, newtemp);
+
+                            $$->id = newtemp;
+                            $$->tipo = REAL;
                         } else {
                             yyerror("Tipo no válido para el operador suma");
                         }
@@ -378,8 +389,25 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                     };
 
 exp_b:              exp_b TOK_R_Y exp_b {
-                        // TODO
+                        printf("AND op1 %d de tipo %d, op2 %d de tipo %d\n", $1->id, $1->tipo, $3->id, $3->tipo);
+                        
+                        if ($1->tipo == BOOLEANO && $3->tipo == BOOLEANO) {
+                            printf("DEBUG | AND entre booleanos\n");
+                            int newtemp = insert_var_TS(&symTable, "", BOOLEANO);
+                            insert_QT(&quadTable, QT_B_AND, $1->id, $3->id, newtemp);
+
+                            $$->id = newtemp;
+                            $$->tipo = BOOLEANO;
+                        } else {
+                            yyerror("Tipo no válido para el operador suma");
+                        }
+
+                        printf("************************************************\n");
+                        print_QT(&quadTable);
+                        print_TS(&symTable);
+                        printf("************************************************\n");
                     }
+
                     | exp_b TOK_R_O exp_b {
                         // TODO
                     }
@@ -415,7 +443,9 @@ operando:           TOK_ID {
                     };
 
 operando_b:         TOK_ID_BOOL {
-                        // TODO
+                        symbol_node *node_b = get_var(&symTable, $1);
+                        $$->id = node_b->id;
+                        $$->tipo = BOOLEANO;
                     }
                     | operando_b TOK_OP_DOT operando_b {
                         // TODO
@@ -450,6 +480,16 @@ asignacion:         operando TOK_OP_ASSIGNAMENT expresion {
 
                     | operando_b TOK_OP_ASSIGNAMENT expresion {
                         printf("PARSER || Asignación de un operando booleano\n");
+                        
+                        if ($1->tipo == $3->tipo ) 
+                            insert_QT(&quadTable,QT_ASSIG,$3->id,OP_NULL,$1->id);
+                        else
+                            yyerror("Tipos no compatibles para asignacion");
+                        
+                        printf("************************************************\n");
+                        print_QT(&quadTable);
+                        print_TS(&symTable);
+                        printf("************************************************\n");
                     };
 
 alternativa:        TOK_R_SI expresion TOK_OP_THEN instrucciones lista_opciones TOK_R_FSI {
