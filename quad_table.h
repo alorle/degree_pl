@@ -7,6 +7,7 @@
 
 typedef enum
 {
+    QT_ASSIG,
     // ARITHMETIC OPERATORS
     QT_SUMA,
     QT_RESTA,
@@ -14,8 +15,9 @@ typedef enum
     QT_DIV_REAL,
     QT_MULT,
     QT_MOD,
-    QT_MINUS,
-    QT_ASSIG,
+    QT_MINUS_ENT,
+    QT_MINUS_REAL,
+    QT_ENTERO2REAL,
     // BOOLEAN OPERATORS
     QT_B_AND,
     QT_B_OR,

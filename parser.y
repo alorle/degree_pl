@@ -25,11 +25,12 @@ void yyerror(char *s);
 %token <cadena> TOK_ID TOK_ID_BOOL <numero_entero> TOK_LITERAL_INT <numero_real> TOK_LITERAL_REAL <booleano> TOK_LITERAL_BOOL <caracter> TOK_LITERAL_CHAR <cadena> TOK_LITERAL_STR TOK_COMMENT
 
 /* Reserved words */
-%token TOK_R_ACCION TOK_R_ALGORITMO TOK_R_BOOLEANO TOK_R_CADENA TOK_R_CARACTER TOK_R_CONST TOK_R_CONTINUAR TOK_R_DE TOK_R_DEV TOK_R_DIV TOK_R_ES TOK_R_ENT TOK_R_ENTERO TOK_R_FACCION TOK_R_FALGORITMO TOK_R_FCONST TOK_R_FFUNCION TOK_R_FMIENTRAS TOK_R_FPARA TOK_R_FSI TOK_R_FTIPO TOK_R_FTUPLA TOK_R_FUNCION TOK_R_FVAR TOK_R_HACER TOK_R_HASTA TOK_R_MIENTRAS TOK_R_MOD TOK_R_NO TOK_R_O TOK_R_PARA TOK_R_REAL TOK_R_REF TOK_R_SAL TOK_R_SI TOK_R_TABLA TOK_R_TIPO TOK_R_TUPLA TOK_R_VAR TOK_R_Y
+%token TOK_R_ACCION TOK_R_ALGORITMO TOK_R_BOOLEANO TOK_R_CADENA TOK_R_CARACTER TOK_R_CONST TOK_R_CONTINUAR TOK_R_DE TOK_R_DEV TOK_R_ES TOK_R_ENT TOK_R_ENTERO TOK_R_FACCION TOK_R_FALGORITMO TOK_R_FCONST TOK_R_FFUNCION TOK_R_FMIENTRAS TOK_R_FPARA TOK_R_FSI TOK_R_FTIPO TOK_R_FTUPLA TOK_R_FUNCION TOK_R_FVAR TOK_R_HACER TOK_R_HASTA TOK_R_MIENTRAS TOK_R_NO TOK_R_O TOK_R_PARA TOK_R_REAL TOK_R_REF TOK_R_SAL TOK_R_SI TOK_R_TABLA TOK_R_TIPO TOK_R_TUPLA TOK_R_VAR TOK_R_Y
 
 /* Operators */
 %token TOK_OP_ASSIGNAMENT TOK_OP_SEQU_COMPOS TOK_OP_SEPARATOR TOK_OP_SUBRANGE TOK_OP_VAR_TYPE_DEF TOK_OP_THEN TOK_OP_ELSE_IF TOK_OP_TYPE_DEFINITION TOK_OP_ARRAY_INIT TOK_OP_ARRAY_CLOSE TOK_OP_DOT TOK_OP_REL TOK_OP_PAREN_OPEN TOK_OP_PAREN_CLOSE
 %left TOK_OP_PLUS TOK_OP_MINUS
+%left TOK_R_MOD TOK_R_DIV
 %left TOK_OP_TIMES TOK_OP_DIVIDE
 
 %type <tipo> d_tipo
@@ -207,17 +208,41 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
 
                         if ($1->tipo == ENTERO && $3->tipo == ENTERO) {
                             printf("DEBUG | Suma entera\n");
-                            int newtemp = insert_var_TS(&symTable, "", ENTERO);
-                            insert_QT(&quadTable, QT_SUMA, $1->id, $3->id, newtemp);
 
-                            $$->id = newtemp;
+                            int result = insert_var_TS(&symTable, "", ENTERO);
+                            insert_QT(&quadTable, QT_SUMA, $1->id, $3->id, result);
+
+                            $$->id = result;
                             $$->tipo = ENTERO;
-                        } else if ($1->tipo == REAL || $3->tipo == REAL) {
+                        } else if ($1->tipo == REAL && $3->tipo == REAL) {
                             printf("DEBUG | Suma real\n");
-                            int newtemp = insert_var_TS(&symTable, "", REAL);
-                            insert_QT(&quadTable, QT_SUMA, $1->id, $3->id, newtemp);
 
-                            $$->id = newtemp;
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_SUMA, $1->id, $3->id, result);
+
+                            $$->id = result;
+                            $$->tipo = REAL;
+                        } else if ($1->tipo == ENTERO && $3->tipo == REAL) {
+                            printf("DEBUG | Suma real con el primer operador ENTERO\n");
+
+                            int op1 = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_ENTERO2REAL, $1->id, OP_NULL, op1);
+
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_SUMA, op1, $3->id, result);
+
+                            $$->id = result;
+                            $$->tipo = REAL;
+                        } else if ($1->tipo == REAL && $3->tipo == ENTERO) {
+                            printf("DEBUG | Suma real con el segundo operador ENTERO\n");
+
+                            int op2 = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_ENTERO2REAL, $3->id, OP_NULL, op2);
+
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_SUMA, $1->id, op2, result);
+
+                            $$->id = result;
                             $$->tipo = REAL;
                         } else {
                             yyerror("Tipo no válido para el operador suma");
@@ -233,17 +258,41 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
 
                         if ($1->tipo == ENTERO && $3->tipo == ENTERO) {
                             printf("DEBUG | Resta entera\n");
-                            int newtemp = insert_var_TS(&symTable, "", ENTERO);
-                            insert_QT(&quadTable, QT_RESTA, $1->id, $3->id, newtemp);
 
-                            $$->id = newtemp;
+                            int result = insert_var_TS(&symTable, "", ENTERO);
+                            insert_QT(&quadTable, QT_RESTA, $1->id, $3->id, result);
+
+                            $$->id = result;
                             $$->tipo = ENTERO;
-                        } else if ($1->tipo == REAL || $3->tipo == REAL) {
+                        } else if ($1->tipo == REAL && $3->tipo == REAL) {
                             printf("DEBUG | Resta real\n");
-                            int newtemp = insert_var_TS(&symTable, "", REAL);
-                            insert_QT(&quadTable, QT_RESTA, $1->id, $3->id, newtemp);
 
-                            $$->id = newtemp;
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_RESTA, $1->id, $3->id, result);
+
+                            $$->id = result;
+                            $$->tipo = REAL;
+                        } else if ($1->tipo == ENTERO && $3->tipo == REAL) {
+                            printf("DEBUG | Resta real con el primer operador ENTERO\n");
+
+                            int op1 = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_ENTERO2REAL, $1->id, OP_NULL, op1);
+
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_RESTA, op1, $3->id, result);
+
+                            $$->id = result;
+                            $$->tipo = REAL;
+                        } else if ($1->tipo == REAL && $3->tipo == ENTERO) {
+                            printf("DEBUG | Resta real con el segundo operador ENTERO\n");
+
+                            int op2 = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_ENTERO2REAL, $3->id, OP_NULL, op2);
+
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_RESTA, $1->id, op2, result);
+
+                            $$->id = result;
                             $$->tipo = REAL;
                         } else {
                             yyerror("Tipo no válido para el operador resta");
@@ -259,17 +308,41 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
 
                         if ($1->tipo == ENTERO && $3->tipo == ENTERO) {
                             printf("DEBUG | Multiplicación entera\n");
-                            int newtemp = insert_var_TS(&symTable, "", ENTERO);
-                            insert_QT(&quadTable, QT_MULT, $1->id, $3->id, newtemp);
 
-                            $$->id = newtemp;
+                            int result = insert_var_TS(&symTable, "", ENTERO);
+                            insert_QT(&quadTable, QT_MULT, $1->id, $3->id, result);
+
+                            $$->id = result;
                             $$->tipo = ENTERO;
-                        } else if ($1->tipo == REAL || $3->tipo == REAL) {
+                        } else if ($1->tipo == REAL && $3->tipo == REAL) {
                             printf("DEBUG | Multiplicación real\n");
-                            int newtemp = insert_var_TS(&symTable, "", REAL);
-                            insert_QT(&quadTable, QT_MULT, $1->id, $3->id, newtemp);
 
-                            $$->id = newtemp;
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_MULT, $1->id, $3->id, result);
+
+                            $$->id = result;
+                            $$->tipo = REAL;
+                        } else if ($1->tipo == ENTERO && $3->tipo == REAL) {
+                            printf("DEBUG | Multiplicación real con primer operador ENTERO\n");
+
+                            int op1 = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_ENTERO2REAL, $1->id, OP_NULL, op1);
+
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_MULT, op1, $3->id, result);
+
+                            $$->id = result;
+                            $$->tipo = REAL;
+                        } else if ($1->tipo == REAL && $3->tipo == ENTERO) {
+                            printf("DEBUG | Multiplicación real con segundo operador ENTERO\n");
+
+                            int op2 = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_ENTERO2REAL, $3->id, OP_NULL, op2);
+
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_MULT, $1->id, op2, result);
+
+                            $$->id = result;
                             $$->tipo = REAL;
                         } else {
                             yyerror("Tipo no válido para el operador multiplicación");
@@ -283,12 +356,49 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                     | exp_a TOK_OP_DIVIDE exp_a {
                         printf("Dividiendo op1 %d de tipo %d con op2 %d de tipo %d\n", $1->id, $1->tipo, $3->id, $3->tipo);
 
-                        if (($1->tipo == ENTERO || $1->tipo == REAL) && ($3->tipo == ENTERO || $3->tipo == REAL)) {
-                            printf("DEBUG | Divisón real\n");
-                            int newtemp = insert_var_TS(&symTable, "", REAL);
-                            insert_QT(&quadTable, QT_DIV_REAL, $1->id, $3->id, newtemp);
+                        if ($1->tipo == ENTERO && $3->tipo == ENTERO) {
+                            printf("DEBUG | Divisón real entre ENTEROS\n");
 
-                            $$->id = newtemp;
+                            int op1 = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_ENTERO2REAL, $1->id, OP_NULL, op1);
+
+                            int op2 = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_ENTERO2REAL, $3->id, OP_NULL, op2);
+
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_DIV_REAL, op1, op2, result);
+
+                            $$->id = result;
+                            $$->tipo = REAL;
+                        } else if ($1->tipo == REAL && $3->tipo == REAL) {
+                            printf("DEBUG | Divisón real entre REALES\n");
+
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_DIV_REAL, $1->id, $3->id, result);
+
+                            $$->id = result;
+                            $$->tipo = REAL;
+                        } else if ($1->tipo == ENTERO && $3->tipo == REAL) {
+                            printf("DEBUG | Divisón real entre ENTERO y REAL\n");
+
+                            int op1 = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_ENTERO2REAL, $1->id, OP_NULL, op1);
+
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_DIV_REAL, op1, $3->id, result);
+
+                            $$->id = result;
+                            $$->tipo = REAL;
+                        } else if ($1->tipo == REAL && $3->tipo == ENTERO) {
+                            printf("DEBUG | Divisón real entre REAL y ENTERO\n");
+
+                            int op2 = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_ENTERO2REAL, $3->id, OP_NULL, op2);
+
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_DIV_REAL, $1->id, op2, result);
+
+                            $$->id = result;
                             $$->tipo = REAL;
                         } else {
                             yyerror("Tipo no válido para el operador divisón real");
@@ -304,10 +414,11 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
 
                         if ($1->tipo == ENTERO && $3->tipo == ENTERO) {
                             printf("DEBUG | Módulo\n");
-                            int newtemp = insert_var_TS(&symTable, "", ENTERO);
-                            insert_QT(&quadTable, QT_MOD, $1->id, $3->id, newtemp);
 
-                            $$->id = newtemp;
+                            int result = insert_var_TS(&symTable, "", ENTERO);
+                            insert_QT(&quadTable, QT_MOD, $1->id, $3->id, result);
+
+                            $$->id = result;
                             $$->tipo = ENTERO;
                         } else {
                             yyerror("Tipo no válido para el operador módulo");
@@ -323,10 +434,11 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
 
                         if ($1->tipo == ENTERO && $3->tipo == ENTERO) {
                             printf("DEBUG | Divisón entera\n");
-                            int newtemp = insert_var_TS(&symTable, "", ENTERO);
-                            insert_QT(&quadTable, QT_DIV_ENT, $1->id, $3->id, newtemp);
 
-                            $$->id = newtemp;
+                            int result = insert_var_TS(&symTable, "", ENTERO);
+                            insert_QT(&quadTable, QT_DIV_ENT, $1->id, $3->id, result);
+
+                            $$->id = result;
                             $$->tipo = ENTERO;
                         } else {
                             yyerror("Tipo no válido para el operador divisón entera");
@@ -359,17 +471,19 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
 
                         if ($2->tipo == ENTERO) {
                             printf("DEBUG | Cambio de signo entero\n");
-                            int newtemp = insert_var_TS(&symTable, "", ENTERO);
-                            insert_QT(&quadTable, QT_MINUS, $2->id, OP_NULL, newtemp);
 
-                            $$->id = newtemp;
+                            int result = insert_var_TS(&symTable, "", ENTERO);
+                            insert_QT(&quadTable, QT_MINUS_ENT, $2->id, OP_NULL, result);
+
+                            $$->id = result;
                             $$->tipo = ENTERO;
                         } else if ($2->tipo == REAL) {
                             printf("DEBUG | Cambio de signo real\n");
-                            int newtemp = insert_var_TS(&symTable, "", REAL);
-                            insert_QT(&quadTable, QT_MINUS, $2->id, OP_NULL, newtemp);
 
-                            $$->id = newtemp;
+                            int result = insert_var_TS(&symTable, "", REAL);
+                            insert_QT(&quadTable, QT_MINUS_REAL, $2->id, OP_NULL, result);
+
+                            $$->id = result;
                             $$->tipo = REAL;
                         } else {
                             yyerror("Tipo no válido para el operador cambio de signo");
@@ -386,10 +500,10 @@ exp_b:              exp_b TOK_R_Y exp_b {
 
                         if ($1->tipo == BOOLEANO && $3->tipo == BOOLEANO) {
                             printf("DEBUG | AND entre booleanos\n");
-                            int newtemp = insert_var_TS(&symTable, "", BOOLEANO);
-                            insert_QT(&quadTable, QT_B_AND, $1->id, $3->id, newtemp);
+                            int result = insert_var_TS(&symTable, "", BOOLEANO);
+                            insert_QT(&quadTable, QT_B_AND, $1->id, $3->id, result);
 
-                            $$->id = newtemp;
+                            $$->id = result;
                             $$->tipo = BOOLEANO;
                         } else {
                             yyerror("Tipo no válido para el operador suma");
