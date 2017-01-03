@@ -7,6 +7,15 @@
 
 typedef enum
 {
+    ENTERO,
+    REAL,
+    BOOLEANO,
+    CARACTER,
+    CADENA
+} var_type;
+
+typedef enum
+{
     VARIABLE,
     FUNCTION,
     TYPE
@@ -59,7 +68,7 @@ int insert_TS(sym_table *, symbol, sym_type);
 /**
  * Insertar una nueva varaible como símbolo de la tabla
  */
-int insert_var_TS(sym_table *, char *, int);
+int insert_var_TS(sym_table *, char *, var_type);
 
 /**
  * Comprueba la existencia de una variable del mismo nombre

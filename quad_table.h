@@ -5,7 +5,6 @@
 
 #define OP_NULL -1
 
-
 typedef enum
 {
     // ARITHMETIC OPERATORS

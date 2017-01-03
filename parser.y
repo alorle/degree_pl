@@ -3,14 +3,6 @@
 #include "sym_table.h"
 #include "quad_table.h"
 
-FILE *yyin;
-
-#define ENTERO 1
-#define REAL 2
-#define BOOLEANO 3
-#define CARACTER 4
-#define CADENA 5
-
 struct operando_struct {
     int id;
     int tipo;
@@ -20,6 +12,8 @@ struct expresion_struct {
     int id;
     int tipo;
 };
+
+FILE *yyin;
 
 sym_table symTable;
 quad_table quadTable;
@@ -35,16 +29,18 @@ void yyerror(char *s);
 
 /* Operators */
 %token TOK_OP_ASSIGNAMENT TOK_OP_SEQU_COMPOS TOK_OP_SEPARATOR TOK_OP_SUBRANGE TOK_OP_VAR_TYPE_DEF TOK_OP_THEN TOK_OP_ELSE_IF TOK_OP_TYPE_DEFINITION TOK_OP_ARRAY_INIT TOK_OP_ARRAY_CLOSE TOK_OP_DOT TOK_OP_REL TOK_OP_PAREN_OPEN TOK_OP_PAREN_CLOSE
-%left TOK_OP_PLUS TOK_OP_MINUS 
+%left TOK_OP_PLUS TOK_OP_MINUS
 %left TOK_OP_TIMES TOK_OP_DIVIDE
 
 %type <tipo> d_tipo
 %type <tipo> tipo_base
 %type <tipo> lista_id
-%type <op> exp_a
+
 %type <op> operando
-%type <op> exp_b
 %type <op> operando_b
+
+%type <exp> exp_a
+%type <exp> exp_b
 %type <exp> expresion
 
 %union {
@@ -202,14 +198,8 @@ decl_sal:           TOK_R_SAL lista_d_var {
                         printf("PARSER || Declaraciones de salida\n");
                     };
 
-expresion:          exp_a {
-                        $$->id = $1->id;
-                        $$->tipo = $1->tipo;
-                    }
-                    | exp_b {
-                        $$->id = $1->id;
-                        $$->tipo = $1->tipo;
-                    }
+expresion:          exp_a
+                    | exp_b
                     | funcion_ll {};
 
 exp_a:              exp_a TOK_OP_PLUS exp_a {
@@ -351,7 +341,8 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                         $$ = $2;
                     }
                     | operando {
-                        $$ = $1;
+                        $$->id = $1->id;
+                        $$->tipo = $1->tipo;
                     }
                     | TOK_LITERAL_INT {
                         $$ = malloc (sizeof(struct operando_struct *));
@@ -392,7 +383,7 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
 
 exp_b:              exp_b TOK_R_Y exp_b {
                         printf("AND op1 %d de tipo %d, op2 %d de tipo %d\n", $1->id, $1->tipo, $3->id, $3->tipo);
-                        
+
                         if ($1->tipo == BOOLEANO && $3->tipo == BOOLEANO) {
                             printf("DEBUG | AND entre booleanos\n");
                             int newtemp = insert_var_TS(&symTable, "", BOOLEANO);
@@ -470,7 +461,7 @@ instruccion:        TOK_R_CONTINUAR {}
 
 asignacion:         operando TOK_OP_ASSIGNAMENT expresion {
                         printf("PARSER || Asignación de un operando aritmético\n");
-                        if ($1->tipo == $3->tipo ) 
+                        if ($1->tipo == $3->tipo )
                             insert_QT(&quadTable,QT_ASSIG,$3->id,OP_NULL,$1->id);
                         else
                             yyerror("Tipos no compatibles para asignacion");
@@ -482,12 +473,12 @@ asignacion:         operando TOK_OP_ASSIGNAMENT expresion {
 
                     | operando_b TOK_OP_ASSIGNAMENT expresion {
                         printf("PARSER || Asignación de un operando booleano\n");
-                        
-                        if ($1->tipo == $3->tipo ) 
+
+                        if ($1->tipo == $3->tipo )
                             insert_QT(&quadTable,QT_ASSIG,$3->id,OP_NULL,$1->id);
                         else
                             yyerror("Tipos no compatibles para asignacion");
-                        
+
                         printf("************************************************\n");
                         print_QT(&quadTable);
                         print_TS(&symTable);

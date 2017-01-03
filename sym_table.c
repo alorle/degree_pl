@@ -49,7 +49,7 @@ int insert_TS(sym_table *table, symbol new_sym, sym_type type)
     return last->id;
 }
 
-int insert_var_TS(sym_table *table, char *name, int type)
+int insert_var_TS(sym_table *table, char *name, var_type type)
 {
     if (strcmp("", name) != 0 && exists_var(table, name)) {
         return -1;
