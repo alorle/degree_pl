@@ -1,18 +1,20 @@
 %{
 #include <stdio.h>
+#include <stdarg.h>
 #include "structs.h"
 #include "sym_table.h"
 #include "quad_table.h"
 
-FILE *yyin;
+extern int yylineno;
+extern FILE *yyin;
 
 sym_table symTable;
 quad_table quadTable;
 
 void debug_tables();
-void debug_msg(char *);
-
-void yyerror(char *);
+void debug_msg(const char *, ...);
+void reduction_msg(const char *, ...);
+void yyerror(const char *, ...);
 %}
 
 /* Tokens */
@@ -54,7 +56,7 @@ void yyerror(char *);
 %%
 
 desc_algoritmo:     TOK_R_ALGORITMO TOK_ID cabecera_alg bloque_alg TOK_R_FALGORITMO {
-                        printf("PARSER || ALGORITMO con nombre %s\n", $2);
+                        reduction_msg("ALGORITMO con nombre %s", $2);
                     };
 
 cabecera_alg:       decl_globales decl_a_f decl_ent_sal TOK_COMMENT {};
@@ -63,22 +65,22 @@ bloque_alg:         bloque TOK_COMMENT {};
 
 decl_globales:      /* vacío */ {}
                     | declaracion_tipo decl_globales {
-                        printf("PARSER || Declaración global de tipos\n");
+                        reduction_msg("Declaración global de tipos");
                     }
                     | declaracion_const decl_globales {
-                        printf("PARSER || Declaración global de constantes\n");
+                        reduction_msg("Declaración global de constantes");
                     };
 
 decl_a_f:           /* vacío */ {}
                     | accion_d decl_a_f {
-                        printf("PARSER || Declaración de acciones\n");
+                        reduction_msg("Declaración de acciones");
                     }
                     | funcion_d decl_a_f {
-                        printf("PARSER || Declaración de funciones\n");
+                        reduction_msg("Declaración de funciones");
                     };
 
 bloque:             declaraciones instrucciones {
-                        printf("PARSER || Bloque del algoritmo\n");
+                        reduction_msg("Bloque del algoritmo");
                     };
 
 declaraciones:      /* vacío */ {}
@@ -87,20 +89,20 @@ declaraciones:      /* vacío */ {}
                     | declaracion_var declaraciones {};
 
 declaracion_tipo:   TOK_R_TIPO lista_d_tipo TOK_R_FTIPO TOK_OP_SEQU_COMPOS {
-                        printf("PARSER || Declaración de tipos\n");
+                        reduction_msg("Declaración de tipos");
                     };
 
 declaracion_const:  TOK_R_CONST lista_d_cte TOK_R_FCONST TOK_OP_SEQU_COMPOS {
-                        printf("PARSER || Declaración de constantes\n");
+                        reduction_msg("Declaración de constantes");
                     };
 
 declaracion_var:    TOK_R_VAR lista_d_var TOK_R_FVAR TOK_OP_SEQU_COMPOS {
-                        printf("PARSER || Declaración de variables\n");
+                        reduction_msg("Declaración de variables");
                     };
 
 lista_d_tipo:       /* vacío */ {}
                     | TOK_ID TOK_OP_TYPE_DEFINITION d_tipo TOK_OP_SEQU_COMPOS lista_d_tipo {
-                        printf("PARSER || Declaración de tipo %s\n", variable_tipo_names[$3]);
+                        reduction_msg("Declaración de tipo %s", variable_tipo_names[$3]);
                     };
 
 d_tipo:             TOK_R_TUPLA lista_campos TOK_R_FTUPLA {
@@ -130,48 +132,48 @@ tipo_base:          TOK_R_ENTERO        {$$ = VAR_ENTERO;}
 
 expresion_t:        expresion {}
                     | TOK_LITERAL_CHAR {
-                        printf("PARSER || Expresión literal de tipo char: %c\n", $1);
+                        reduction_msg("Expresión literal de tipo char: %c", $1);
                     };
 
 lista_campos:       /* vacío */ {}
                     | TOK_ID TOK_OP_VAR_TYPE_DEF d_tipo TOK_OP_SEQU_COMPOS lista_campos {
-                        printf("PARSER || Lista de campos\n");
+                        reduction_msg("Lista de campos");
                     };
 
 lista_d_cte:        /* vacío */ {}
                     | TOK_ID TOK_OP_TYPE_DEFINITION literal TOK_OP_SEQU_COMPOS lista_d_cte {
-                        printf("PARSER || Lista de constantes\n");
+                        reduction_msg("Lista de constantes");
                     };
 
-literal:            TOK_LITERAL_INT     { printf("PARSER || Literal entero: %ld\n", $1); }
-                    | TOK_LITERAL_REAL  { printf("PARSER || Literal real: %f\n", $1); }
-                    | TOK_LITERAL_BOOL  { printf("PARSER || Literal booleano: %d\n", $1); }
-                    | TOK_LITERAL_CHAR  { printf("PARSER || Literal caracter: %c\n", $1); }
-                    | TOK_LITERAL_STR   { printf("PARSER || Literal cadena: %s\n", $1); };
+literal:            TOK_LITERAL_INT     { reduction_msg("Literal entero: %ld", $1); }
+                    | TOK_LITERAL_REAL  { reduction_msg("Literal real: %f", $1); }
+                    | TOK_LITERAL_BOOL  { reduction_msg("Literal booleano: %d", $1); }
+                    | TOK_LITERAL_CHAR  { reduction_msg("Literal caracter: %c", $1); }
+                    | TOK_LITERAL_STR   { reduction_msg("Literal cadena: %s", $1); };
 
 lista_d_var:        /* vacío */ {}
                     | lista_id TOK_OP_SEQU_COMPOS lista_d_var {
-                        printf("PARSER || Lista de variables de tipo %s\n", variable_tipo_names[$1]);
+                        reduction_msg("Lista de variables de tipo %s", variable_tipo_names[$1]);
                     };
 
 lista_id:           TOK_ID TOK_OP_VAR_TYPE_DEF d_tipo {
                         if (insert_var_TS(&symTable, $1, $3) < 0)
-                            yyerror("Variable ya definida anteriormente");
+                            yyerror("Variable '%s' de tipo %s ya definida anteriormente", $1, variable_tipo_names[$3]);
                         $$ = $3;
                     }
                     | TOK_ID_BOOL TOK_OP_VAR_TYPE_DEF d_tipo {
                         if (insert_var_TS(&symTable, $1, $3) < 0)
-                            yyerror("Variable ya definida anteriormente");
+                            yyerror("Variable '%s' de tipo %s ya definida anteriormente", $1, variable_tipo_names[$3]);
                         $$ = $3;
                     }
                     | TOK_ID TOK_OP_SEPARATOR lista_id {
                         if (insert_var_TS(&symTable, $1, $3) < 0)
-                            yyerror("Variable ya definida anteriormente");
+                            yyerror("Variable '%s' de tipo %s ya definida anteriormente", $1, variable_tipo_names[$3]);
                         $$ = $3;
                     }
                     | TOK_ID_BOOL TOK_OP_SEPARATOR lista_id {
                         if (insert_var_TS(&symTable, $1, $3) < 0)
-                            yyerror("Variable ya definida anteriormente");
+                            yyerror("Variable '%s' de tipo %s ya definida anteriormente", $1, variable_tipo_names[$3]);
                         $$ = $3;
                     };
 
@@ -180,11 +182,11 @@ decl_ent_sal:       decl_ent {}
                     | decl_ent decl_sal {};
 
 decl_ent:           TOK_R_ENT lista_d_var {
-                        printf("PARSER || Declaraciones de entrada\n");
+                        reduction_msg("Declaraciones de entrada");
                     };
 
 decl_sal:           TOK_R_SAL lista_d_var {
-                        printf("PARSER || Declaraciones de salida\n");
+                        reduction_msg("Declaraciones de salida");
                     };
 
 expresion:          exp_a {
@@ -239,7 +241,8 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                             $$.id = result;
                             $$.tipo = VAR_REAL;
                         } else {
-                            yyerror("Tipo no válido para el operador suma");
+                            yyerror("Tipos %s y %s no compatibles para el operador suma",
+                                variable_tipo_names[$1.tipo], variable_tipo_names[$3.tipo]);
                         }
                     }
                     | exp_a TOK_OP_MINUS exp_a {
@@ -282,7 +285,8 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                             $$.id = result;
                             $$.tipo = VAR_REAL;
                         } else {
-                            yyerror("Tipo no válido para el operador resta");
+                            yyerror("Tipos %s y %s no compatibles para el operador resta",
+                                variable_tipo_names[$1.tipo], variable_tipo_names[$3.tipo]);
                         }
                     }
                     | exp_a TOK_OP_TIMES exp_a {
@@ -325,7 +329,8 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                             $$.id = result;
                             $$.tipo = VAR_REAL;
                         } else {
-                            yyerror("Tipo no válido para el operador multiplicación");
+                            yyerror("Tipos %s y %s no compatibles para el operador producto",
+                                variable_tipo_names[$1.tipo], variable_tipo_names[$3.tipo]);
                         }
                     }
                     | exp_a TOK_OP_DIVIDE exp_a {
@@ -374,7 +379,8 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                             $$.id = result;
                             $$.tipo = VAR_REAL;
                         } else {
-                            yyerror("Tipo no válido para el operador divisón real");
+                            yyerror("Tipos %s y %s no compatibles para el operador divisón real",
+                                variable_tipo_names[$1.tipo], variable_tipo_names[$3.tipo]);
                         }
                     }
                     | exp_a TOK_R_MOD exp_a {
@@ -387,7 +393,8 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                             $$.id = result;
                             $$.tipo = VAR_ENTERO;
                         } else {
-                            yyerror("Tipo no válido para el operador módulo");
+                            yyerror("Tipos %s y %s no compatibles para el operador módulo",
+                                variable_tipo_names[$1.tipo], variable_tipo_names[$3.tipo]);
                         }
                     }
                     | exp_a TOK_R_DIV exp_a {
@@ -400,15 +407,15 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                             $$.id = result;
                             $$.tipo = VAR_ENTERO;
                         } else {
-                            yyerror("Tipo no válido para el operador divisón entera");
+                            yyerror("Tipos %s y %s no compatibles para el operador divisón entera",
+                                variable_tipo_names[$1.tipo], variable_tipo_names[$3.tipo]);
                         }
                     }
                     | TOK_OP_PAREN_OPEN exp_a TOK_OP_PAREN_CLOSE {
                         $$ = $2;
                     }
                     | operando {
-                        $$.id = $1.id;
-                        $$.tipo = $1.tipo;
+                        $$ = $1;
                     }
                     | TOK_LITERAL_INT {
                         $$.id = insert_var_TS(&symTable, "", VAR_ENTERO);
@@ -436,7 +443,8 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                             $$.id = result;
                             $$.tipo = VAR_REAL;
                         } else {
-                            yyerror("Tipo no válido para el operador cambio de signo");
+                            yyerror("Tipo %s no compatible para el operador menos",
+                                variable_tipo_names[$2.tipo]);
                         }
                     };
 
@@ -504,7 +512,8 @@ asignacion:         operando TOK_OP_ASSIGNAMENT expresion {
                             debug_msg("Asignación aritmética");
                             insert_QT(&quadTable, OP_ASIGNACION, $3.a.id, OP_NULL, $1.id);
                         } else
-                            yyerror("Tipos no compatibles para asignacion");
+                            yyerror("No se puede asignar un valor de tipo %s a una variable de tipo %s",
+                                variable_tipo_names[$3.a.tipo], variable_tipo_names[$1.tipo]);
                     }
                     | operando_b TOK_OP_ASSIGNAMENT expresion {
                         if ($3.tipo == EXP_BOOLEANO) {
@@ -512,73 +521,74 @@ asignacion:         operando TOK_OP_ASSIGNAMENT expresion {
                             $1.verdadero = $3.b.verdadero;
                             $1.falso = $3.b.falso;
                         } else
-                            yyerror("Tipos no compatibles para asignacion");
+                            yyerror("No se puede asignar un valor de tipo %s a una variable de tipo BOOLEANO",
+                                variable_tipo_names[$3.a.tipo]);
                     };
 
 alternativa:        TOK_R_SI expresion TOK_OP_THEN instrucciones lista_opciones TOK_R_FSI {
-                        printf("PARSER || Instrucción SI\n");
+                        reduction_msg("Instrucción SI");
                     };
 
 lista_opciones:     /* vacío */ {}
                     | TOK_OP_ELSE_IF expresion TOK_OP_THEN instrucciones lista_opciones {
-                        printf("PARSER || Instrucción SI NO\n");
+                        reduction_msg("Instrucción SI NO");
                     };
 
 iteracion:          it_cota_fija {}
                     | it_cota_exp {};
 
 it_cota_fija:       TOK_R_PARA TOK_ID TOK_OP_ASSIGNAMENT expresion TOK_R_HASTA expresion TOK_R_HACER instrucciones TOK_R_FPARA {
-                        printf("PARSER || Instrucción PARA con cota fija\n");
+                        reduction_msg("Instrucción PARA con cota fija");
                     };
 
 it_cota_exp:        TOK_R_MIENTRAS expresion TOK_R_HACER instrucciones TOK_R_FMIENTRAS {
-                        printf("PARSER || Instrucción PARA con expresión como cota\n");
+                        reduction_msg("Instrucción PARA con expresión como cota");
                     };
 
 accion_d:           TOK_R_ACCION a_cabecera bloque TOK_R_FACCION {
-                        printf("PARSER || Acción\n");
+                        reduction_msg("Acción");
                     };
 
 funcion_d:          TOK_R_FUNCION f_cabecera bloque TOK_R_DEV expresion TOK_R_FFUNCION {
-                        printf("PARSER || Función\n");
+                        reduction_msg("Función");
                     };
 
 a_cabecera:         TOK_ID TOK_OP_PAREN_OPEN d_par_form TOK_OP_PAREN_CLOSE TOK_OP_SEQU_COMPOS {
-                        printf("PARSER || Cabecera de acción con nombre %s\n", $1);
+                        reduction_msg("Cabecera de acción con nombre %s", $1);
                     };
 
 f_cabecera:         TOK_ID TOK_OP_PAREN_OPEN lista_d_var TOK_OP_PAREN_CLOSE TOK_R_DEV d_tipo TOK_OP_SEQU_COMPOS {
-                        printf("PARSER || Cabecera de función con nombre %s\n", $1);
+                        reduction_msg("Cabecera de función con nombre %s", $1);
                     };
 
 d_par_form:         /* vacío */ {}
                     | d_p_form TOK_OP_SEQU_COMPOS d_par_form {
-                        printf("PARSER ||d_par_form\n");
+                        reduction_msg("d_par_form");
                     };
 
 d_p_form:           TOK_R_ENT lista_id TOK_OP_VAR_TYPE_DEF d_tipo {
-                        printf("PARSER || d_p_form\n");
+                        reduction_msg("d_p_form");
                     }
                     | TOK_R_SI lista_id TOK_OP_VAR_TYPE_DEF d_tipo {
-                        printf("PARSER || d_p_form\n");
+                        reduction_msg("d_p_form");
                     }
                     | TOK_R_ES lista_id TOK_OP_VAR_TYPE_DEF d_tipo {
-                        printf("PARSER || d_p_form\n");
+                        reduction_msg("d_p_form");
                     };
 
 accion_ll:          TOK_ID TOK_OP_PAREN_OPEN l_ll TOK_OP_PAREN_CLOSE {
-                        printf("PARSER || accion_ll: %s\n", $1);
+                        reduction_msg("accion_ll: %s", $1);
                     };
 
 funcion_ll:         TOK_ID TOK_OP_PAREN_OPEN l_ll TOK_OP_PAREN_CLOSE {
-                        printf("PARSER || funcion_ll: %s\n", $1);
+                        reduction_msg("funcion_ll: %s", $1);
                     };
 
 l_ll:               expresion TOK_OP_SEPARATOR l_ll {
-                        printf("PARSER || l_ll\n");
+                        reduction_msg("l_ll");
                     }
                     | expresion {
-                        printf("PARSER || l_ll\n");
+                        reduction_msg("l_ll");
                     };
 
 %%
@@ -589,7 +599,7 @@ int main(int argc, char **argv) {
     yyin = (argc > 0) ? fopen(argv[0], "r") : stdin;
 
     if (yyin == NULL) {
-        printf("PARSER || I can't input file!");
+        reduction_msg("I can't input file!");
         return -1;
     }
 
@@ -604,18 +614,43 @@ int main(int argc, char **argv) {
 }
 
 void debug_tables() {
+#if DEBUG
     fprintf(stdout, "\033[36m-----------------------------------------------------------------------\033[0m\n");
     fprintf(stdout, "\033[36m\nDEBUG: Quad Table\033[0m\n");
     print_QT(&quadTable);
     fprintf(stdout, "\033[36m\nDEBUG: Sym Table \033[0m\n");
     print_TS(&symTable);
     fprintf(stdout, "\033[36m-----------------------------------------------------------------------\033[0m\n");
+#endif
 }
 
-void debug_msg(char *s) {
-    fprintf(stdout, "\033[36mDEBUG: %s\033[0m\n", s);
+void debug_msg(const char *format, ...) {
+#if DEBUG
+    va_list args;
+    fprintf(stdout, "\033[36mDEBUG: ");
+    va_start(args, format);
+    vfprintf(stdout, format, args);
+    va_end(args);
+    fprintf(stdout, "\033[0m\n");
+#endif
 }
 
-void yyerror(char *s) {
-    fprintf(stderr, "\033[31mERROR: %s\033[0m\n", s);
+void reduction_msg(const char *format, ...) {
+#if DEBUG
+    va_list args;
+    fprintf(stdout, "\033[32mREDUCCION: ");
+    va_start(args, format);
+    vfprintf(stdout, format, args);
+    va_end(args);
+    fprintf(stdout, "\033[0m\n");
+#endif
+}
+
+void yyerror(const char *format, ...) {
+    va_list args;
+    fprintf(stderr, "\033[31mERROR en la linea %d: ", yylineno);
+    va_start(args, format);
+    vfprintf(stderr, format, args);
+    va_end(args);
+    fprintf(stderr, "\033[0m\n");
 }

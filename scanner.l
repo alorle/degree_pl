@@ -1,9 +1,13 @@
 %{
+#include <stdio.h>
+#include <stdarg.h>
 #include <string.h>
 #include "structs.h"
 #include "sym_table.h"
 #include "quad_table.h"
 #include "parser.tab.h"
+
+void scanner_msg(const char *, ...);
 %}
 
 /* Alphabet */
@@ -89,100 +93,102 @@ OP_DIVIDE           "/"
 /* Ignored */
 SEPARATOR           " "|\t|\n
 
+%option yylineno
+
 %%
 
 {COMMENT} {
-    printf("COMMENT: %s\n", yytext);
+    scanner_msg("COMMENT: %s", yytext);
     return TOK_COMMENT;
 }
 
 {OP_ASSIGNAMENT} {
-    printf("OP asignación: %s\n", yytext);
+    scanner_msg("OP asignación: %s", yytext);
     return TOK_OP_ASSIGNAMENT;
 }
 
 {OP_SEQU_COMPOS} {
-    printf("OP composición secuencial: %s\n", yytext);
+    scanner_msg("OP composición secuencial: %s", yytext);
     return TOK_OP_SEQU_COMPOS;
 }
 
 {OP_SEPARATOR} {
-    printf("OP separador: %s\n", yytext);
+    scanner_msg("OP separador: %s", yytext);
     return TOK_OP_SEPARATOR;
 }
 
 {OP_SUBRANGE} {
-    printf("OP subrango: %s\n", yytext);
+    scanner_msg("OP subrango: %s", yytext);
     return TOK_OP_SUBRANGE;
 }
 
 {OP_VAR_TYPE_DEF} {
-    printf("OP definición de tipo de una variable: %s\n", yytext);
+    scanner_msg("OP definición de tipo de una variable: %s", yytext);
     return TOK_OP_VAR_TYPE_DEF;
 }
 
 {OP_THEN} {
-    printf("OP entonces: %s\n", yytext);
+    scanner_msg("OP entonces: %s", yytext);
     return TOK_OP_THEN;
 }
 
 {OP_ELSE_IF} {
-    printf("OP si no si: %s\n", yytext);
+    scanner_msg("OP si no si: %s", yytext);
     return TOK_OP_ELSE_IF;
 }
 
 {OP_TYPE_DEFINITION} {
-    printf("OP creación de tipo: %s\n", yytext);
+    scanner_msg("OP creación de tipo: %s", yytext);
     return TOK_OP_TYPE_DEFINITION;
 }
 
 {OP_ARRAY_INIT} {
-    printf("OP inicio de array: %s\n", yytext);
+    scanner_msg("OP inicio de array: %s", yytext);
     return TOK_OP_ARRAY_INIT;
 }
 
 {OP_ARRAY_CLOSE} {
-    printf("OP fin de array: %s\n", yytext);
+    scanner_msg("OP fin de array: %s", yytext);
     return TOK_OP_ARRAY_CLOSE;
 }
 
 {OP_DOT} {
-    printf("OP punto: %s\n", yytext);
+    scanner_msg("OP punto: %s", yytext);
     return TOK_OP_DOT;
 }
 
 {OP_REL} {
-    printf("OP relacional: %s\n", yytext);
+    scanner_msg("OP relacional: %s", yytext);
     return TOK_OP_REL;
 }
 
 {OP_PAREN_OPEN} {
-    printf("OP inicio de parentesis: %s\n", yytext);
+    scanner_msg("OP inicio de parentesis: %s", yytext);
     return TOK_OP_PAREN_OPEN;
 }
 
 {OP_PAREN_CLOSE} {
-    printf("OP fin de parentesis: %s\n", yytext);
+    scanner_msg("OP fin de parentesis: %s", yytext);
     return TOK_OP_PAREN_CLOSE;
 }
 
 {OP_PLUS} {
-    printf("OP más: %s\n", yytext);
+    scanner_msg("OP más: %s", yytext);
     return TOK_OP_PLUS;
 }
 
 {OP_MINUS} {
-    printf("OP menos: %s\n", yytext);
+    scanner_msg("OP menos: %s", yytext);
     return TOK_OP_MINUS;
 }
 
 {OP_TIMES} {
-    printf("OP multiplicación: %s\n", yytext);
+    scanner_msg("OP multiplicación: %s", yytext);
     return TOK_OP_TIMES;
 }
 
 {OP_DIVIDE} {
-    printf("OP división: %s\n", yytext);
+    scanner_msg("OP división: %s", yytext);
     return TOK_OP_DIVIDE;
 }
 
@@ -202,7 +208,7 @@ SEPARATOR           " "|\t|\n
         value *= 10;
     }
 
-    printf("LITERAL_INT: %ld\n", value);
+    scanner_msg("LITERAL_INT: %ld", value);
 
     yylval.numero_entero = value;
     return TOK_LITERAL_INT;
@@ -210,7 +216,7 @@ SEPARATOR           " "|\t|\n
 
 {LITERAL_REAL} {
     double value = atof(yytext);
-    printf("LITERAL_REAL: %f\n", value);
+    scanner_msg("LITERAL_REAL: %f", value);
 
     yylval.numero_real = value;
     return TOK_LITERAL_REAL;
@@ -222,7 +228,7 @@ SEPARATOR           " "|\t|\n
         value = TRUE;
     }
 
-    printf("LITERAL_BOOL: %s (%d)\n", yytext, value);
+    scanner_msg("LITERAL_BOOL: %s (%d)", yytext, value);
 
     yylval.booleano = value;
     return TOK_LITERAL_BOOL;
@@ -230,7 +236,7 @@ SEPARATOR           " "|\t|\n
 
 {LITERAL_CHAR} {
     char value = yytext[1];
-    printf("LITERAL_CHAR: %c\n", value);
+    scanner_msg("LITERAL_CHAR: %c", value);
 
     yylval.caracter = value;
     return TOK_LITERAL_CHAR;
@@ -239,231 +245,243 @@ SEPARATOR           " "|\t|\n
 {LITERAL_STR} {
     char* value = yytext+1;
     value[strlen(value) - 1] = '\0';
-    printf("LITERAL_STR: %s\n", value);
+    scanner_msg("LITERAL_STR: %s", value);
 
     yylval.cadena = value;
     return TOK_LITERAL_STR;
 }
 
 {R_ACCION} {
-    printf("RESERVED: accion = %s\n", yytext);
+    scanner_msg("RESERVED: accion = %s", yytext);
     return TOK_R_ACCION;
 }
 
 {R_ALGORITMO} {
-    printf("RESERVED: algoritmo = %s\n", yytext);
+    scanner_msg("RESERVED: algoritmo = %s", yytext);
     return TOK_R_ALGORITMO;
 }
 
 {R_BOOLEANO} {
-    printf("RESERVED: booleano = %s\n", yytext);
+    scanner_msg("RESERVED: booleano = %s", yytext);
     return TOK_R_BOOLEANO;
 }
 
 {R_CADENA} {
-    printf("RESERVED: cadena = %s\n", yytext);
+    scanner_msg("RESERVED: cadena = %s", yytext);
     return TOK_R_CADENA;
 }
 
 {R_CARACTER} {
-    printf("RESERVED: caracter = %s\n", yytext);
+    scanner_msg("RESERVED: caracter = %s", yytext);
     return TOK_R_CARACTER;
 }
 
 {R_CONST} {
-    printf("RESERVED: const = %s\n", yytext);
+    scanner_msg("RESERVED: const = %s", yytext);
     return TOK_R_CONST;
 }
 
 {R_CONTINUAR} {
-    printf("RESERVED: continuar = %s\n", yytext);
+    scanner_msg("RESERVED: continuar = %s", yytext);
     return TOK_R_CONTINUAR;
 }
 
 {R_DE} {
-    printf("RESERVED: de = %s\n", yytext);
+    scanner_msg("RESERVED: de = %s", yytext);
     return TOK_R_DE;
 }
 
 R_DEV {
-    printf("RESERVED: dev = %s\n", yytext);
+    scanner_msg("RESERVED: dev = %s", yytext);
     return TOK_R_DEV;
 }
 
 {R_DIV} {
-    printf("RESERVED: div = %s\n", yytext);
+    scanner_msg("RESERVED: div = %s", yytext);
     return TOK_R_DIV;
 }
 
 {R_ES} {
-    printf("RESERVED: es = %s\n", yytext);
+    scanner_msg("RESERVED: es = %s", yytext);
     return TOK_R_ES;
 }
 
 {R_ENT} {
-    printf("RESERVED: ent = %s\n", yytext);
+    scanner_msg("RESERVED: ent = %s", yytext);
     return TOK_R_ENT;
 }
 
 {R_ENTERO} {
-    printf("RESERVED: entero = %s\n", yytext);
+    scanner_msg("RESERVED: entero = %s", yytext);
     return TOK_R_ENTERO;
 }
 
 {R_FACCION} {
-    printf("RESERVED: faccion = %s\n", yytext);
+    scanner_msg("RESERVED: faccion = %s", yytext);
     return TOK_R_FACCION;
 }
 
 {R_FALGORITMO} {
-    printf("RESERVED: falgoritmo = %s\n", yytext);
+    scanner_msg("RESERVED: falgoritmo = %s", yytext);
     return TOK_R_FALGORITMO;
 }
 
 {R_FCONST} {
-    printf("RESERVED: fconst = %s\n", yytext);
+    scanner_msg("RESERVED: fconst = %s", yytext);
     return TOK_R_FCONST;
 }
 
 {R_FFUNCION} {
-    printf("RESERVED: ffuncion = %s\n", yytext);
+    scanner_msg("RESERVED: ffuncion = %s", yytext);
     return TOK_R_FFUNCION;
 }
 
 {R_FMIENTRAS} {
-    printf("RESERVED: fmientras = %s\n", yytext);
+    scanner_msg("RESERVED: fmientras = %s", yytext);
     return TOK_R_FMIENTRAS;
 }
 
 {R_FPARA} {
-    printf("RESERVED: fpara = %s\n", yytext);
+    scanner_msg("RESERVED: fpara = %s", yytext);
     return TOK_R_FPARA;
 }
 
 {R_FSI} {
-    printf("RESERVED: fsi = %s\n", yytext);
+    scanner_msg("RESERVED: fsi = %s", yytext);
     return TOK_R_FSI;
 }
 
 {R_FTIPO} {
-    printf("RESERVED: ftipo = %s\n", yytext);
+    scanner_msg("RESERVED: ftipo = %s", yytext);
     return TOK_R_FTIPO;
 }
 
 {R_FTUPLA} {
-    printf("RESERVED: ftupla = %s\n", yytext);
+    scanner_msg("RESERVED: ftupla = %s", yytext);
     return TOK_R_FTUPLA;
 }
 
 {R_FUNCION} {
-    printf("RESERVED: funcion = %s\n", yytext);
+    scanner_msg("RESERVED: funcion = %s", yytext);
     return TOK_R_FUNCION;
 }
 
 {R_FVAR} {
-    printf("RESERVED: fvar = %s\n", yytext);
+    scanner_msg("RESERVED: fvar = %s", yytext);
     return TOK_R_FVAR;
 }
 
 {R_HACER} {
-    printf("RESERVED: hacer = %s\n", yytext);
+    scanner_msg("RESERVED: hacer = %s", yytext);
     return TOK_R_HACER;
 }
 
 {R_HASTA} {
-    printf("RESERVED: hasta = %s\n", yytext);
+    scanner_msg("RESERVED: hasta = %s", yytext);
     return TOK_R_HASTA;
 }
 
 {R_MIENTRAS} {
-    printf("RESERVED: mientras = %s\n", yytext);
+    scanner_msg("RESERVED: mientras = %s", yytext);
     return TOK_R_MIENTRAS;
 }
 
 {R_MOD} {
-    printf("RESERVED: mod = %s\n", yytext);
+    scanner_msg("RESERVED: mod = %s", yytext);
     return TOK_R_MOD;
 }
 
 {R_NO} {
-    printf("RESERVED: no = %s\n", yytext);
+    scanner_msg("RESERVED: no = %s", yytext);
     return TOK_R_NO;
 }
 
 {R_O} {
-    printf("RESERVED: o = %s\n", yytext);
+    scanner_msg("RESERVED: o = %s", yytext);
     return TOK_R_O;
 }
 
 {R_PARA} {
-    printf("RESERVED: para = %s\n", yytext);
+    scanner_msg("RESERVED: para = %s", yytext);
     return TOK_R_PARA;
 }
 
 {R_REAL} {
-    printf("RESERVED: real = %s\n", yytext);
+    scanner_msg("RESERVED: real = %s", yytext);
     return TOK_R_REAL;
 }
 
 {R_REF} {
-    printf("RESERVED: ref = %s\n", yytext);
+    scanner_msg("RESERVED: ref = %s", yytext);
     return TOK_R_REF;
 }
 
 {R_SAL} {
-    printf("RESERVED: sal = %s\n", yytext);
+    scanner_msg("RESERVED: sal = %s", yytext);
     return TOK_R_SAL;
 }
 
 {R_SI} {
-    printf("RESERVED: si = %s\n", yytext);
+    scanner_msg("RESERVED: si = %s", yytext);
     return TOK_R_SI;
 }
 
 {R_TABLA} {
-    printf("RESERVED: tabla = %s\n", yytext);
+    scanner_msg("RESERVED: tabla = %s", yytext);
     return TOK_R_TABLA;
 }
 
 {R_TIPO} {
-    printf("RESERVED: tipo = %s\n", yytext);
+    scanner_msg("RESERVED: tipo = %s", yytext);
     return TOK_R_TIPO;
 }
 
 {R_TUPLA} {
-    printf("RESERVED: tupla = %s\n", yytext);
+    scanner_msg("RESERVED: tupla = %s", yytext);
     return TOK_R_TUPLA;
 }
 
 {R_VAR} {
-    printf("RESERVED: var = %s\n", yytext);
+    scanner_msg("RESERVED: var = %s", yytext);
     return TOK_R_VAR;
 }
 
 {R_Y} {
-    printf("RESERVED: y = %s\n", yytext);
+    scanner_msg("RESERVED: y = %s", yytext);
     return TOK_R_Y;
 }
 
 {ID_BOOL} {
-    printf("ID_BOOL: %s\n", yytext);
+    scanner_msg("ID_BOOL: %s", yytext);
     yylval.cadena = (char *) malloc (sizeof(char) * strlen(yytext));
     strcpy(yylval.cadena, yytext);
     return TOK_ID_BOOL;
 }
 
 {ID} {
-    printf("ID: %s\n", yytext);
+    scanner_msg("ID: %s", yytext);
     yylval.cadena = (char *) malloc (sizeof(char) * strlen(yytext));
     strcpy(yylval.cadena, yytext);
     return TOK_ID;
 }
 
 {SPECIAL} {
-    printf("SPECIAL: %s\n", yytext);
+    scanner_msg("SPECIAL: %s", yytext);
 }
 
-. {
-}
+{SEPARATOR} {}
+
+. {}
 
 %%
+
+void scanner_msg(const char *format, ...) {
+#if DEBUG
+    va_list args;
+    fprintf(stdout, "SCANNER: ");
+    va_start(args, format);
+    vfprintf(stdout, format, args);
+    va_end(args);
+    fprintf(stdout, "\n");
+#endif
+}

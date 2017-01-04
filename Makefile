@@ -1,20 +1,38 @@
-scanner:
-	flex -i --outfile=scanner.c scanner.l
+PARSER_SRC = parser.y
+PARSER_OUT = parser.tab.c
+PARSER_OBJS = parser.tab.c parser.tab.h parser.output parser
+PARSER_FLAGS = -d -v
+
+SCANNER_SRC = scanner.l
+SCANNER_OUT = scanner.c
+SCANNER_OBJS = scanner.c scanner.o scanner
+SCANNER_FLAGS = -i
+
+LIBS = $(PARSER_OUT) $(SCANNER_OUT) sym_table.c quad_table.c -lfl
+OUT = compiler
+
+all:    compiler
+debug:  compiler
+
+debug:  DEBUG=-DDEBUG
 
 parser:
-	bison -d -v parser.y
+	bison $(PARSER_FLAGS) $(PARSER_SRC)
+
+scanner:
+	flex $(SCANNER_FLAGS) --outfile=$(SCANNER_OUT) $(SCANNER_SRC)
 
 compiler: parser scanner
-	gcc parser.tab.c scanner.c sym_table.c quad_table.c -lfl -o compiler
+	gcc -o $(OUT) $(DEBUG) $(LIBS)
 
 test1: compiler
-	./compiler program1.alg
+	./$(OUT) program1.alg
 
 test2: compiler
-	./compiler program2.alg
+	./$(OUT) program2.alg
 
 test3: compiler
-	./compiler program3.alg
+	./$(OUT) program3.alg
 
 clean:
-	rm -rf scanner scanner.c scanner.o parser parser.tab.c parser.tab.h parser.output compiler
+	rm -rf $(SCANNER_OBJS) $(PARSER_OBJS) $(OUT)
