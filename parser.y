@@ -3,14 +3,30 @@
 #include "sym_table.h"
 #include "quad_table.h"
 
-struct operando_struct {
+struct operando_a_struct {
     int id;
     int tipo;
 };
 
-struct expresion_struct {
+struct expresion_a_struct {
     int id;
     int tipo;
+};
+
+struct operando_b_struct {
+    int id;
+    int *true;
+    int *false;
+};
+
+struct expresion_b_struct {
+    int *true;
+    int *false;
+};
+
+struct expresion_struct {
+    struct expresion_a_struct a;
+    struct expresion_b_struct b;
 };
 
 FILE *yyin;
@@ -40,12 +56,13 @@ void yyerror(char *);
 %type <tipo> tipo_base
 %type <tipo> lista_id
 
-%type <op> operando
-%type <op> operando_b
-
-%type <exp> exp_a
-%type <exp> exp_b
 %type <exp> expresion
+
+%type <op_a> operando
+%type <exp_a> exp_a
+
+%type <op_b> operando_b
+%type <exp_b> exp_b
 
 %union {
     char caracter;
@@ -54,8 +71,11 @@ void yyerror(char *);
     double numero_real;
     long int numero_entero;
     int tipo;
-    struct operando_struct *op;
     struct expresion_struct *exp;
+    struct operando_a_struct *op_a;
+    struct expresion_a_struct *exp_a;
+    struct operando_b_struct *op_b;
+    struct expresion_b_struct *exp_b;
 };
 
 %%
@@ -195,8 +215,14 @@ decl_sal:           TOK_R_SAL lista_d_var {
                         printf("PARSER || Declaraciones de salida\n");
                     };
 
-expresion:          exp_a
-                    | exp_b
+expresion:          exp_a {
+                        $$->a.id = $1->id;
+                        $$->a.tipo = $1->tipo;
+                    }
+                    | exp_b {
+                        $$->b.true = $1->true;
+                        $$->b.false = $1->false;
+                    }
                     | funcion_ll {};
 
 exp_a:              exp_a TOK_OP_PLUS exp_a {
@@ -471,22 +497,8 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                     };
 
 exp_b:              exp_b TOK_R_Y exp_b {
-                        printf("AND op1 %d de tipo %d, op2 %d de tipo %d\n", $1->id, $1->tipo, $3->id, $3->tipo);
-
-                        if ($1->tipo == BOOLEANO && $3->tipo == BOOLEANO) {
-                            debug_msg("AND entre booleanos");
-                            int result = insert_var_TS(&symTable, "", BOOLEANO);
-                            insert_QT(&quadTable, QT_B_AND, $1->id, $3->id, result);
-
-                            $$->id = result;
-                            $$->tipo = BOOLEANO;
-                        } else {
-                            yyerror("Tipo no válido para el operador suma");
-                        }
-
-                        debug_tables();
+                        // TODO
                     }
-
                     | exp_b TOK_R_O exp_b {
                         // TODO
                     }
@@ -522,9 +534,9 @@ operando:           TOK_ID {
                     };
 
 operando_b:         TOK_ID_BOOL {
-                        symbol_node *node_b = get_var(&symTable, $1);
-                        $$->id = node_b->id;
-                        $$->tipo = BOOLEANO;
+                        // FIXME
+                        symbol_node *node = get_var(&symTable, $1);
+                        $$->id = node->id;
                     }
                     | operando_b TOK_OP_DOT operando_b {
                         // TODO
@@ -547,20 +559,22 @@ instruccion:        TOK_R_CONTINUAR {}
 
 asignacion:         operando TOK_OP_ASSIGNAMENT expresion {
                         printf("PARSER || Asignación de un operando aritmético\n");
-                        if ($1->tipo == $3->tipo )
-                            insert_QT(&quadTable,QT_ASSIG,$3->id,OP_NULL,$1->id);
-                        else
+                        if ($1->tipo == $3->a.tipo) {
+                            printf("PARSER || Asignación, expresion dcha: %d de tipo %d\n", $3->a.id, $3->a.tipo);
+                            insert_QT(&quadTable, QT_ASSIG, $3->a.id, OP_NULL, $1->id);
+                        } else
                             yyerror("Tipos no compatibles para asignacion");
 
                         debug_tables();
                     }
-
                     | operando_b TOK_OP_ASSIGNAMENT expresion {
+                        // FIXME
                         printf("PARSER || Asignación de un operando booleano\n");
 
-                        if ($1->tipo == $3->tipo )
-                            insert_QT(&quadTable,QT_ASSIG,$3->id,OP_NULL,$1->id);
-                        else
+                        if (0) {
+                            $1->true = $3->b.true;
+                            $1->false = $3->b.false;
+                        } else
                             yyerror("Tipos no compatibles para asignacion");
 
                         debug_tables();
