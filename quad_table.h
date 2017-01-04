@@ -2,45 +2,18 @@
 #define QUAD_TABLE_H
 
 #include <stdio.h>
+#include "structs.h"
 
 #define OP_NULL -1
 
-typedef enum
-{
-    QT_ASSIG,
-    // ARITHMETIC OPERATORS
-    QT_SUMA,
-    QT_RESTA,
-    QT_DIV_ENT,
-    QT_DIV_REAL,
-    QT_MULT,
-    QT_MOD,
-    QT_MINUS_ENT,
-    QT_MINUS_REAL,
-    QT_ENTERO2REAL,
-    // BOOLEAN OPERATORS
-    QT_B_AND,
-    QT_B_OR,
-    QT_B_LESS,
-    QT_B_LESSE,
-    QT_B_GREATER,
-    QT_B_GREATERE,
-    QT_B_NOTE,
-    QT_B_E
-
-} operation;
-
-
-typedef struct
-{
-    operation op;
+typedef struct {
+    operador op;
     int arg1;
     int arg2;
     int result;
 } quad;
 
-typedef struct
-{
+typedef struct {
     int size;
     quad array[100];
 } quad_table;
@@ -58,6 +31,6 @@ void print_QT(quad_table *);
 /**
  * Insertar nueva cuadrupla
  */
-void insert_QT(quad_table *, operation, int, int, int);
+void insert_QT(quad_table *, operador, int, int, int);
 
 #endif

@@ -1,10 +1,9 @@
 %{
 #include <string.h>
+#include "structs.h"
+#include "sym_table.h"
+#include "quad_table.h"
 #include "parser.tab.h"
-
-typedef int bool;
-#define TRUE 1
-#define FALSE 0
 %}
 
 /* Alphabet */

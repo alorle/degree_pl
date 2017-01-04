@@ -13,27 +13,29 @@ void print_TS(sym_table *table)
 
     while (temp != NULL)
     {
-        switch (temp->type)
+        switch (temp->tipo)
         {
-            case VARIABLE:
-                if (strcmp("", temp->sym.var.name) == 0)
-                    printf("SYM %d as temp variable: type %d\n", temp->id, temp->sym.var.type);
+            case SYM_VARIABLE:
+                if (strcmp("", temp->sym.var.nombre) == 0)
+                    printf("Símbolo # %2d: variable temporal de tipo %s\n",
+                        temp->id, variable_tipo_names[temp->sym.var.tipo]);
                 else
-                    printf("SYM %d as variable: name %s, type %d\n", temp->id, temp->sym.var.name, temp->sym.var.type);
+                    printf("Símbolo # %2d: variable %s de tipo %s\n",
+                        temp->id, temp->sym.var.nombre, variable_tipo_names[temp->sym.var.tipo]);
                 break;
             default:
-                fprintf(stderr, "ERROR: Unknown symbol type (%d)\n", temp->type);
+                fprintf(stderr, "ERROR: símbolo # %2d de tipo desconocido\n", temp->tipo);
         }
         temp = temp->next;
     }
 }
 
-int insert_TS(sym_table *table, symbol new_sym, sym_type type)
+int insert_TS(sym_table *table, symbol new_sym, sym_tipo tipo)
 {
     symbol_node *temp = malloc(sizeof(symbol_node));
     temp->sym = new_sym;
     temp->id = table->size;
-    temp->type = type;
+    temp->tipo = tipo;
     temp->next = NULL;
 
     if (table->sym_list == NULL) {
@@ -49,7 +51,7 @@ int insert_TS(sym_table *table, symbol new_sym, sym_type type)
     return last->id;
 }
 
-int insert_var_TS(sym_table *table, char *name, var_type type)
+int insert_var_TS(sym_table *table, char *name, variable_tipo tipo)
 {
     if (strcmp("", name) != 0 && exists_var(table, name)) {
         return -1;
@@ -57,11 +59,11 @@ int insert_var_TS(sym_table *table, char *name, var_type type)
 
     symbol new_sym;
 
-    new_sym.var.name = (char *) malloc(sizeof(char) * strlen(name));
-    strcpy(new_sym.var.name, name);
-    new_sym.var.type = type;
+    new_sym.var.nombre = (char *) malloc(sizeof(char) * strlen(name));
+    strcpy(new_sym.var.nombre, name);
+    new_sym.var.tipo = tipo;
 
-    return insert_TS(table, new_sym, VARIABLE);
+    return insert_TS(table, new_sym, SYM_VARIABLE);
 }
 
 int exists_var(sym_table *table, char *name)
@@ -74,7 +76,7 @@ symbol_node *get_var(sym_table *table, char *name)
     symbol_node *temp = table->sym_list;
 
     while (temp != NULL) {
-        if (temp->type == VARIABLE && strcmp(temp->sym.var.name, name) == 0) return temp;
+        if (temp->tipo == SYM_VARIABLE && strcmp(temp->sym.var.nombre, name) == 0) return temp;
         temp = temp->next;
     }
 

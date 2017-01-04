@@ -4,46 +4,33 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "structs.h"
 
-typedef enum
-{
-    ENTERO,
-    REAL,
-    BOOLEANO,
-    CARACTER,
-    CADENA
-} var_type;
+typedef enum {
+    SYM_VARIABLE,
+    SYM_FUNCION,
+    SYM_TIPO
+} sym_tipo;
 
-typedef enum
-{
-    VARIABLE,
-    FUNCTION,
-    TYPE
-} sym_type;
-
-typedef struct
-{
-    char *name;
-    int type;
+typedef struct {
+    char *nombre;
+    variable_tipo tipo;
 } variable;
 
-typedef union
-{
+typedef union {
     variable var;
-    // function fun;
-    // type tip;
+    // funcion fun;
+    // tipo tip;
 } symbol;
 
-typedef struct symbol_node
-{
-    symbol sym;
+typedef struct symbol_node {
     int id;
-    sym_type type;
+    sym_tipo tipo;
+    symbol sym;
     struct symbol_node *next;
 } symbol_node;
 
-typedef struct
-{
+typedef struct {
     int size;
     symbol_node *sym_list;
 } sym_table;
@@ -63,12 +50,12 @@ void print_TS(sym_table *);
 /**
  * Insertar un nuevo símbolo en la tabla
  */
-int insert_TS(sym_table *, symbol, sym_type);
+int insert_TS(sym_table *, symbol, sym_tipo);
 
 /**
  * Insertar una nueva varaible como símbolo de la tabla
  */
-int insert_var_TS(sym_table *, char *, var_type);
+int insert_var_TS(sym_table *, char *, variable_tipo);
 
 /**
  * Comprueba la existencia de una variable del mismo nombre
