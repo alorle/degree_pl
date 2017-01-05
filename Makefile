@@ -8,7 +8,7 @@ SCANNER_OUT = scanner.c
 SCANNER_OBJS = scanner.c scanner.o scanner
 SCANNER_FLAGS = -i
 
-LIBS = $(PARSER_OUT) $(SCANNER_OUT) sym_table.c quad_table.c -lfl
+LIBS = $(PARSER_OUT) $(SCANNER_OUT) sym_table.c quad_table.c bool_utils.c -lfl
 OUT = compiler
 
 all:    compiler

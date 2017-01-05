@@ -71,7 +71,11 @@ typedef enum
     OP_BOOL_MENOR,
     OP_BOOL_MENOR_IGUAL,
     OP_BOOL_MAYOR,
-    OP_BOOL_MAYOR_IGUAL
+    OP_BOOL_MAYOR_IGUAL,
+
+    // Operadores de saltos
+    OP_GOTO,
+    OP_CONDICIONAL_GOTO
 } operador;
 
 const static char* operador_names[] = {
@@ -100,8 +104,24 @@ const static char* operador_names[] = {
     "BOOL MENOR         ",
     "BOOL MENOR IGUAL   ",
     "BOOL MAYOR         ",
-    "BOOL MAYOR IGUAL   "
+    "BOOL MAYOR IGUAL   ",
+
+    // Operadores de saltos
+    "OP_GOTO            ",
+    "OP_CONDICIONAL_GOTO"
 };
+
+/**
+  * Struct para la lista de verdadero y falso
+  *
+  * - size: tamaño de la lista
+  *
+  * - array: lista de identificadores de quads
+  */
+typedef struct {
+    int size;
+    int *array;
+} bool_list;
 
 /**
   * Struct para los operadores aritméticos
@@ -126,8 +146,8 @@ typedef struct {
   *          cuando el operador se evalue a falso
   */
 typedef struct {
-    int *verdadero;
-    int *falso;
+    bool_list verdadero;
+    bool_list falso;
 } op_booleano;
 
 /**

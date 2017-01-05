@@ -4,6 +4,7 @@
 #include "structs.h"
 #include "sym_table.h"
 #include "quad_table.h"
+#include "bool_utils.h"
 
 extern int yylineno;
 extern FILE *yyin;
@@ -24,7 +25,7 @@ void yyerror(const char *, ...);
 %token TOK_R_ACCION TOK_R_ALGORITMO TOK_R_BOOLEANO TOK_R_CADENA TOK_R_CARACTER TOK_R_CONST TOK_R_CONTINUAR TOK_R_DE TOK_R_DEV TOK_R_ES TOK_R_ENT TOK_R_ENTERO TOK_R_FACCION TOK_R_FALGORITMO TOK_R_FCONST TOK_R_FFUNCION TOK_R_FMIENTRAS TOK_R_FPARA TOK_R_FSI TOK_R_FTIPO TOK_R_FTUPLA TOK_R_FUNCION TOK_R_FVAR TOK_R_HACER TOK_R_HASTA TOK_R_MIENTRAS TOK_R_NO TOK_R_O TOK_R_PARA TOK_R_REAL TOK_R_REF TOK_R_SAL TOK_R_SI TOK_R_TABLA TOK_R_TIPO TOK_R_TUPLA TOK_R_VAR TOK_R_Y
 
 /* Operators */
-%token TOK_OP_ASSIGNAMENT TOK_OP_SEQU_COMPOS TOK_OP_SEPARATOR TOK_OP_SUBRANGE TOK_OP_VAR_TYPE_DEF TOK_OP_THEN TOK_OP_ELSE_IF TOK_OP_TYPE_DEFINITION TOK_OP_ARRAY_INIT TOK_OP_ARRAY_CLOSE TOK_OP_DOT TOK_OP_REL TOK_OP_PAREN_OPEN TOK_OP_PAREN_CLOSE
+%token TOK_OP_ASSIGNAMENT TOK_OP_SEQU_COMPOS TOK_OP_SEPARATOR TOK_OP_SUBRANGE TOK_OP_VAR_TYPE_DEF TOK_OP_THEN TOK_OP_ELSE_IF TOK_OP_TYPE_DEFINITION TOK_OP_ARRAY_INIT TOK_OP_ARRAY_CLOSE TOK_OP_DOT <op> TOK_OP_REL TOK_OP_PAREN_OPEN TOK_OP_PAREN_CLOSE
 %left TOK_OP_PLUS TOK_OP_MINUS
 %left TOK_R_MOD TOK_R_DIV
 %left TOK_OP_TIMES TOK_OP_DIVIDE
@@ -41,6 +42,8 @@ void yyerror(const char *, ...);
 %type <op_b> operando_b
 %type <op_b> exp_b
 
+%type <quad> exp_b_m
+
 %union {
     char caracter;
     char *cadena;
@@ -48,9 +51,11 @@ void yyerror(const char *, ...);
     double numero_real;
     long int numero_entero;
     variable_tipo tipo;
+    operador op;
     expresion exp;
     op_aritmetico op_a;
     op_booleano op_b;
+    int quad;
 };
 
 %%
@@ -448,27 +453,42 @@ exp_a:              exp_a TOK_OP_PLUS exp_a {
                         }
                     };
 
-exp_b:              exp_b TOK_R_Y exp_b {
-                        // TODO
+exp_b:              exp_b TOK_R_Y exp_b_m exp_b {
+                        backpatch(&quadTable, $1.verdadero, $3);
+                        $$.falso = merge($1.falso, $4.falso);
+                        $$.verdadero = $4.verdadero;
                     }
-                    | exp_b TOK_R_O exp_b {
-                        // TODO
+                    | exp_b TOK_R_O exp_b_m exp_b {
+                        backpatch(&quadTable, $1.falso, $3);
+                        $$.verdadero = merge($1.verdadero, $4.verdadero);
+                        $$.falso = $4.falso;
                     }
                     | TOK_R_NO exp_b {
-                        // TODO
+                        $$.verdadero = $2.falso;
+                        $$.falso = $2.verdadero;
                     }
                     | operando_b {
-                        // TODO
+                        $$ = $1;
                     }
                     | TOK_LITERAL_BOOL {
                         // TODO
                     }
                     | expresion TOK_OP_REL expresion {
-                        // TODO
+                        if ($2 > 0) {
+                            $$.verdadero = makelist(quadTable.size);
+                            $$.falso = makelist(quadTable.size + 1);
+                            insert_QT(&quadTable, $2, $1.a.id, $3.a.id, OP_NULL);
+                            insert_QT(&quadTable, OP_GOTO, OP_NULL, OP_NULL, OP_NULL);
+                        } else
+                            yyerror("Operador relacional desconocido");
                     }
                     | TOK_OP_PAREN_OPEN exp_b TOK_OP_PAREN_CLOSE {
-                        // TODO
+                        $$ = $2;
                     };
+
+exp_b_m:            /* vacío */ {
+                        $$ = quadTable.size;
+                    }
 
 operando:           TOK_ID {
                         symbol_node *node = get_var(&symTable, $1);
@@ -486,7 +506,11 @@ operando:           TOK_ID {
                     };
 
 operando_b:         TOK_ID_BOOL {
-                        // TODO
+                        symbol_node *node = get_var(&symTable, $1);
+                        $$.verdadero = makelist(quadTable.size);
+                        $$.falso = makelist(quadTable.size + 1);
+                        insert_QT(&quadTable, OP_CONDICIONAL_GOTO, node->id, OP_NULL, OP_NULL);
+                        insert_QT(&quadTable, OP_GOTO, OP_NULL, OP_NULL, OP_NULL);
                     }
                     | operando_b TOK_OP_DOT operando_b {
                         // TODO

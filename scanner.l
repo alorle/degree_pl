@@ -159,6 +159,23 @@ SEPARATOR           " "|\t|\n
 
 {OP_REL} {
     scanner_msg("OP relacional: %s", yytext);
+
+    if (strcmp(yytext, "<") == 0) {
+        yylval.op = OP_BOOL_MENOR;
+    } else if (strcmp(yytext, ">") == 0) {
+        yylval.op = OP_BOOL_MAYOR;
+    } else if (strcmp(yytext, "=") == 0) {
+        yylval.op = OP_BOOL_IGUAL;
+    } else if (strcmp(yytext, "<>") == 0) {
+        yylval.op = OP_BOOL_DISTINTO;
+    } else if (strcmp(yytext, ">=") == 0) {
+        yylval.op = OP_BOOL_MAYOR_IGUAL;
+    } else if (strcmp(yytext, "<=") == 0) {
+        yylval.op = OP_BOOL_MENOR_IGUAL;
+    } else {
+        yylval.op = -1;
+    }
+
     return TOK_OP_REL;
 }
 
