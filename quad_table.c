@@ -15,10 +15,12 @@ void print_QT(quad_table *table) {
     }
 }
 
-void insert_QT(quad_table *table, operador op, int arg1, int arg2, int result) {
+int insert_QT(quad_table *table, operador op, int arg1, int arg2, int result) {
     table->array[table->size].op = op;
     table->array[table->size].arg1 = arg1;
     table->array[table->size].arg2 = arg2;
     table->array[table->size].result = result;
     table->size += 1;
+
+    return table->size - 1;
 }

@@ -29,8 +29,8 @@ void init_QT(quad_table *);
 void print_QT(quad_table *);
 
 /**
- * Insertar nueva cuadrupla
+ * Insertar nueva cuadrupla y devuelve el nuevo id
  */
-void insert_QT(quad_table *, operador, int, int, int);
+int insert_QT(quad_table *, operador, int, int, int);
 
 #endif
