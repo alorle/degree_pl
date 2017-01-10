@@ -4,7 +4,6 @@ void backpatch(quad_table *table, bool_list list, int quad) {
     int i;
 
     for(i = 0; i < list.size; i++) {
-        printf("Backpatching quad # %d with %d quad\n", list.array[i], quad);
         table->array[list.array[i]].result = quad;
     }
 }
