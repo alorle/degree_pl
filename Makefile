@@ -12,9 +12,9 @@ LIBS = $(PARSER_OUT) $(SCANNER_OUT) sym_table.c quad_table.c bool_utils.c -lfl
 OUT = compiler
 
 all:    compiler
-debug:  compiler
+verbose:  compiler
 
-debug:  DEBUG=-DDEBUG
+verbose:  DEBUG=-DDEBUG
 
 parser:
 	bison $(PARSER_FLAGS) $(PARSER_SRC)
